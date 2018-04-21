@@ -74,15 +74,14 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, double lam
 {
 	long i, idx, j;
 	double innerProd = 0 , tmpDelta, eta;
+	Noise noise(0.0, sqrt(eta * 2 / nSamples));
 	for (i = 0; i < maxIter; i++) {
 		eta = a * pow(b + i + 1, -gamma);
 		idx = i % nSamples;
-
-		Noise noise(0.0, sqrt(eta * 2 / nSamples));
-		//Xt应该是矩阵啊？
 		innerProd = Xt.col(idx).dot(w);
 		tmpDelta = LogisticPartialGradient(innerProd, y(idx));
-
+		w = -eta/nSamples*d+(1-eta*lambda)*w;
+		w = w.array() + noise.gen();
 		w = w + (-eta) * (tmpDelta - g[idx]) / nSamples * Xt.col(idx);
 		d = d + (tmpDelta - g[idx]) * Xt.col(idx);
 		g[idx] = tmpDelta;
