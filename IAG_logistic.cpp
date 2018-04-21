@@ -34,8 +34,8 @@ void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &X
 	epochCounter = (epochCounter + 1) % PRINT_FREQ;
 	//为什么ret会在循环内部不断更新
 	for (int i = 0; i < pass; i++) {
-		flag = batchSize?InnerLoopBatchDense(w, Xt, y, lambda, d, g, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize):\
-							InnerLoopSingleDense(w, Xt, y, lambda, d, g, maxIter, nSamples, nVars, pass, a, b, gamma);
+		flag = batchSize?InnerLoopBatchDense(w, Xt, y, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize):\
+							InnerLoopSingleDense(w, Xt, y, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma);
 		if (flag) {
 			break;
 		}
@@ -70,7 +70,7 @@ void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &X
 // }
 
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, double lambda, VectorXd &d, VectorXd &g, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
+int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
 {
 	long i, idx, j;
 	double innerProd = 0 , tmpDelta, eta;
@@ -81,10 +81,10 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, double lam
 		innerProd = Xt.col(idx).dot(w);
 		tmpDelta = LogisticPartialGradient(innerProd, y(idx));
 		w = -eta/nSamples*d+(1-eta*lambda)*w;
-		w = w.array() + noise.gen();
-		w = w + (-eta) * (tmpDelta - g[idx]) / nSamples * Xt.col(idx);
-		d = d + (tmpDelta - g[idx]) * Xt.col(idx);
-		g[idx] = tmpDelta;
+		w = NOISY?w.array()+noise.gen():w;
+		w = w + (-eta) * (tmpDelta - g(idx)) / nSamples * Xt.col(idx);
+		d = d + (tmpDelta - g(idx)) * Xt.col(idx);
+		g(idx) = tmpDelta;
 
 		// //compute error
 		// if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
@@ -98,36 +98,36 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, double lam
 	return 0;
 }
 
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, double lambda, VectorXd &d, VectorXd &g, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize)
+int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize)
 {
 	long i, idx, j, k;
 	double innerProd, eta;
 
 	VectorXd gradBuffer(batchSize);
-	VectorXi sampleBuffer(batchSize);
+	int* sampleBuffer = new int[batchSize];
 
 	for (i = 0; i < maxIter;i++) {
 		eta = a * pow(b + i + 1, -gamma);
 		Noise noise(0.0, sqrt(eta * 2 / nSamples));
 		for (k = 0; k < batchSize; k++) {
 			idx = (i*batchSize + k) % nSamples;
-			sampleBuffer(k) = idx;
+			sampleBuffer[k] = idx;
 			innerProd = Xt.col(idx).dot(w);
 			gradBuffer(k) = LogisticPartialGradient(innerProd, y(idx));
 		}
 
 		y = -eta / nSamples * d + (1 - eta * lambda)*w;
-		for (j = 0; j < nVars; j++) {
-			w(j) += NOISY?noise.gen():0;
+		
+		w = NOISY? w.array() + noise.gen():w;
+
+		for (k = 0; k < batchSize; k++) {
+			idx = sampleBuffer[k];
+			w += (-eta * (gradBuffer(k) - g(idx)) / nSamples)*Xt.col(idx);
 		}
 		for (k = 0; k < batchSize; k++) {
-			idx = sampleBuffer(k);
-			w += (-eta * (gradBuffer(k) - g[idx]) / nSamples)*Xt.col(idx);
-		}
-		for (k = 0; k < batchSize; k++) {
-			idx = sampleBuffer(k);
-			d += (gradBuffer(k) - g[idx])*Xt.col(idx);
-			g[idx] = gradBuffer(k);
+			idx = sampleBuffer[k];
+			d += (gradBuffer(k) - g(idx))*Xt.col(idx);
+			g(idx) = gradBuffer(k);
 		}
 		// if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
 		// 	...
@@ -138,6 +138,7 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, double lamb
 		// 	}
 		// }
 	}
+	delete[] sampleBuffer;
 	return 0;
 }
 
@@ -190,15 +191,15 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, double lamb
 // 		}
 
 // 		/* Step 3: approximate w_{i+1} */
-// 		tmpFactor = eta / c / nSamples * (tmpGrad - g[idx]);  // @NOTE biased estimator
+// 		tmpFactor = eta / c / nSamples * (tmpGrad - g(idx));  // @NOTE biased estimator
 // 		//该如何转换成Eigen的表达，可以考虑提问
 // 		cblas_daxpyi(outerStarts[idx + 1] - outerStarts[idx], -tmpFactor, Xt + outerStarts[idx], (int *)(innerIndices + outerStarts[idx]), w);
 // 		// @NOTE (int *) here is 64bit because mwIndex is 64bit, and we have to link libmkl_intel_ilp64.a for 64bit integer
 
-// 		 Step 4: update d and g[idx] 
+// 		 Step 4: update d and g(idx) 
 // 		for (j = outerStarts[idx]; j < (long)outerStarts[idx + 1]; j++)
-// 			d[innerIndices[j]] += Xt[j] * (tmpGrad - g[idx]);
-// 		g[idx] = tmpGrad;
+// 			d[innerIndices[j]] += Xt[j] * (tmpGrad - g(idx));
+// 		g(idx) = tmpGrad;
 
 // 		// Re-normalize the parameter vector if it has gone numerically crazy
 // 		if (((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) || c > 1e100 || c < -1e100 || (c > 0 && c < 1e-100) || (c < 0 && c > -1e-100))

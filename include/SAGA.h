@@ -1,15 +1,15 @@
-#ifndef IAG_H
-#define IAG_H
+#ifndef SAGA_H
+#define SAGA_H
 #include "comm.h"
 #include "LogisticError.h"
 
 using namespace Eigen;
 
-void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
+void SAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
 	const VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda=0.1, double eta=0.1, \
 	int maxIter=60, int batchSize=1, int pass=20, int a=1, int b=1, int gamma=1,  int maxRunTime=20);
 
-void IAG_logistic(VectorXd &w, const SparseMatrix<double> &Xt, int* innerIndices, int* outerStarts, const VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
+void SAGA_logistic(VectorXd &w, const SparseMatrix<double> &Xt, int* innerIndices, int* outerStarts, const VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
 	int maxIter, int batchSize, int pass, int a, int b, int gamma, const MatrixXd &XtTest, \
 	const VectorXd &yTest, int maxRunTime, string filename);
 

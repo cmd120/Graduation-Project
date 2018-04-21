@@ -10,9 +10,9 @@ void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &
 // 	int maxIter, int batchSize, int pass, int a, int b, int gamma, const MatrixXd &XtTest, \
 // 	const VectorXd &yTest, int maxRunTime, string filename);
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double lambda, VectorXd &d, VectorXd &g, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma);
+int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma);
 // int InnerLoopSingleSparse(VectorXd &w, const SparseMatrix<double> &Xt, int *innerIndices, int *outerStarts, VectorXd y, double lambda, VectorXd d, double *g, long maxIter, int nSamples, int nVars, int batchSize, int pass, double a, double b, double gamma);
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double lambda, VectorXd &d, VectorXd &g, long maxIter, int nSamples, int nVars, int batchSize,int pass, double a, double b, double gamma);
+int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int batchSize,int pass, double a, double b, double gamma);
 // int InnerLoopBatchSparse(VectorXd &w, const SparseMatrix<double> &Xt, int *innerIndices, int *outerStarts, VectorXd y, double lambda, VectorXd d, double *g, long maxIter, int nSamples, int nVars, int batchSize,int pass, double a, double b, double gamma);
 
 // void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
@@ -40,10 +40,10 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, doub
 // 	fclose(fp);
 // }
 
-// int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double lambda, VectorXd &d, VectorXd &g, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma){
+// int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma){
 // 	;
 // }
-// int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double lambda, VectorXd &d, VectorXd &g, long maxIter, int nSamples, int nVars, int batchSize,int pass, double a, double b, double gamma){
+// int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int batchSize,int pass, double a, double b, double gamma){
 // 	;
 // }
 // int main(){
