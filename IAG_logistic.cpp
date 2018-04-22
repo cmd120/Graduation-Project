@@ -105,10 +105,9 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d
 
 	VectorXd gradBuffer(batchSize);
 	int* sampleBuffer = new int[batchSize];
-
+	Noise noise(0.0, sqrt(eta * 2 / nSamples));
 	for (i = 0; i < maxIter;i++) {
 		eta = a * pow(b + i + 1, -gamma);
-		Noise noise(0.0, sqrt(eta * 2 / nSamples));
 		for (k = 0; k < batchSize; k++) {
 			idx = (i*batchSize + k) % nSamples;
 			sampleBuffer[k] = idx;
@@ -116,7 +115,7 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d
 			gradBuffer(k) = LogisticPartialGradient(innerProd, y(idx));
 		}
 
-		y = -eta / nSamples * d + (1 - eta * lambda)*w;
+		w = -eta / nSamples * d + (1 - eta * lambda)*w;
 		
 		w = NOISY? w.array() + noise.gen():w;
 
