@@ -30,10 +30,14 @@ int main()
     // VectorXd y_test(Vtdata);
     // cout << (int)Vtdata(0) <<endl;
     // IAG_logistic(w, Mtdata, Vtdata, Xt_test, y_test, d, g, filename);
-    VectorXd a(3);
+    VectorXd a(3),b(3);
     a(0) = 1;
     a(1) = 2;
     a(2) = 3;
+    b(0) = 1;
+    b(1) = 2;
+    b(2) = 3;
+    a-b;
     return 0;
     // IAG_logistic(w, Xt, y, Xt_test, y_test, d, g, filename);
 	// vector<unsigned char> aa;
