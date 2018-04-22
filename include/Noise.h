@@ -14,18 +14,18 @@ private:
 	//这个好像没有用到过
 	std::uniform_int_distribution<int> uniformDist;
 public:
-	Noise(double mean, double variance);
-	Noise(int begin, int end);
-	double gen();
+	Noise(double mean, double variance) :normalDist(mean, variance) 
+	{
+		this->distribution_type = NORMAL;
+	}
+	Noise(int begin, int end) : uniformDist(begin, end) 
+	{
+		this->distribution_type = UNIFORM;
+	}
+	double gen() 
+	{
+		return this->distribution_type == NORMAL ? this->normalDist(this->sed) : this->uniformDist(this->sed);
+	}
 };
 
-Noise::Noise(double mean, double variance) :normalDist(mean, variance) {
-	this->distribution_type = NORMAL;
-}
-Noise::Noise(int begin, int end) : uniformDist(begin, end) {
-	this->distribution_type = UNIFORM;
-}
-double Noise::gen() {
-	return this->distribution_type == NORMAL ? this->normalDist(this->sed) : this->uniformDist(this->sed);
-}
 #endif
