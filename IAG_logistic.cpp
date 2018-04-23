@@ -14,33 +14,53 @@ IAG_logistic(w,Xt,y,lambda,eta,d,g);
 % b - used to determine step sizes
 % gamma - used to determine step sizes
 % XtTest
-% ytest
+% yTest
 % maxRunTime
 % filename - saving results
 */
-void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
-	const VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda, double eta, \
+
+// chrono example
+// auto t1 = Clock::now();
+// //balabala
+// auto t2 = Clock::now();
+// cout << "Delta t2-t1: " << chrono::duration_cast<chrono::nanoseconds>(t2-t1).count() << endl;
+int epochCounter;
+FILE *fp;
+auto startTime = Clock::now();
+
+
+void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
+	 VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda, double eta, \
 	int maxIter, int batchSize, int pass, int a, int b, int gamma,  int maxRunTime) {
 	
+	startTime = Clock::now();
+
 	int nVars, nSamples, flag;
 	int epochCounter = 0;
 	nVars = Xt.rows();
 	nSamples = Xt.cols();
-	FILE *fp = fopen(filename.c_str(), "a");
+	fp = fopen(filename.c_str(), "a");
 	if (fp == NULL) {
 		cout << "Cannot write results to file: " << filename << endl;
 	}
+	epochCounter = 0;
 	LogisticError(w, XtTest, yTest, 0, 0, fp);
 	epochCounter = (epochCounter + 1) % PRINT_FREQ;
 	//为什么ret会在循环内部不断更新
 	for (int i = 0; i < pass; i++) {
-		flag = batchSize?InnerLoopBatchDense(w, Xt, y, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize):\
-							InnerLoopSingleDense(w, Xt, y, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma);
+		flag = batchSize?InnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+							InnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
 		if (flag) {
 			break;
 		}
 	}
+	cout << "point 3" << endl;
 	fclose(fp);
+
+	auto endTime = Clock::now();
+	cout << "duration: " << chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION << endl;
+
+	return;
 }
 // void IAG_logistic(VectorXd &w, const SparseMatrix<double> &Xt, int* innerIndices, int* outerStarts, const VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
 // 	int maxIter, int batchSize, int pass, int a, int b, int gamma, const MatrixXd &XtTest, \
@@ -70,7 +90,7 @@ void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &X
 // }
 
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
+int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
 {
 	long i, idx, j;
 	double innerProd = 0 , tmpDelta, eta;
@@ -86,19 +106,21 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &
 		d = d + (tmpDelta - g(idx)) * Xt.col(idx);
 		g(idx) = tmpDelta;
 
-		// //compute error
-		// if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-		// 	LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
-		// 	epochCounter = (epochCounter + 1) % PRINT_FREQ;
-		// 	if (telapsed >= maxRunTime) {
-		// 		return 1;
-		// 	}
-		// }
+		//compute error
+		if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+			auto endTime = Clock::now();
+			double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+			LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+			epochCounter = (epochCounter + 1) % PRINT_FREQ;
+			if (telapsed >= maxRunTime) {
+				return 1;
+			}
+		}
 	}
 	return 0;
 }
 
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize)
+int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize, int maxRunTime)
 {
 	long i, idx, j, k;
 	double innerProd, eta;

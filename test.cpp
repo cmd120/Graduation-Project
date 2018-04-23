@@ -29,7 +29,8 @@ int main()
     MatrixXd Xt_test(Mtdata);
     VectorXd y_test(Vtdata);
     cout << (int)Vtdata(0) <<endl;
-    IAG_logistic(w, Mtdata, Vtdata, Xt_test, y_test, d, g, filename);
+    VectorXd y = Vtdata;
+    IAG_logistic(w, Mtdata, y, Xt_test, y_test, d, g, filename);
     // VectorXd a(3),b(3);
     // a(0) = 1;
     // a(1) = 2;
