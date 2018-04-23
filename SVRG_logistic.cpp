@@ -19,10 +19,16 @@ SVRG_logistic(w,Xt,y,lambda,eta,wtilde,G);
 % maxRunTime
 % filename - saving results
 */
+int epochCounter;
+FILE *fp;
+auto startTime = Clock::now();
+
 void SVRG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
-    const VectorXd &yTest, VectorXd wtilde, VectorXd G, string filename, double lambda, double eta, \
+     VectorXd &yTest, VectorXd wtilde, VectorXd G, string filename, double lambda, double eta, \
     int maxIter, int batchSize, int pass, int a, int b, int gamma,  int maxRunTime) {
     
+    startTime = Clock::now();
+
     int nVars, nSamples, flag;
     int epochCounter = 0;
     nVars = Xt.rows();
@@ -31,21 +37,27 @@ void SVRG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &
     if (fp == NULL) {
         cout << "Cannot write results to file: " << filename << endl;
     }
+    epochCounter = 0;
     LogisticError(w, XtTest, yTest, 0, 0, fp);
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
     //为什么ret会在循环内部不断更新
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?InnerLoopBatchDense(w, Xt, y, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize):\
-                            InnerLoopSingleDense(w, Xt, y, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma);
+        flag = batchSize?InnerLoopBatchDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+                            InnerLoopSingleDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
         }
     }
     fclose(fp);
+
+    auto endTime = Clock::now();
+    cout << "duration: " << chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION << endl;
+
+    return;
 }
 
 
-int InnerLoopSingleDense(VectorXd &w,const MatrixXd &Xt, VectorXd y, VectorXd &wtilde, VectorXd &G, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
+int InnerLoopSingleDense(VectorXd &w,const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &wtilde, VectorXd &G, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
 {
     long i, idx, j;
     double innerProdI = 0, innerProdZ=0, tmpDelta, eta;
@@ -65,19 +77,21 @@ int InnerLoopSingleDense(VectorXd &w,const MatrixXd &Xt, VectorXd y, VectorXd &w
         w = NOISY?w.array()+noise.gen():w;
         w = w + (-eta) * tmpDelta * Xt.col(idx);
 
-        // //compute error
-        // if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-        //  LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
-        //  epochCounter = (epochCounter + 1) % PRINT_FREQ;
-        //  if (telapsed >= maxRunTime) {
-        //      return 1;
-        //  }
-        // }
+        //compute error
+        if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+            auto endTime = Clock::now();
+            double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+            LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+            epochCounter = (epochCounter + 1) % PRINT_FREQ;
+            if (telapsed >= maxRunTime) {
+                return 1;
+            }
+        }
     }
     return 0;
 }
 
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &wtilde, VectorXd &G, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize)
+int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &wtilde, VectorXd &G, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize, int maxRunTime)
 {
     long i, idx, j, k;
     double innerProdI=0,innerProdZ=0, eta;
@@ -109,6 +123,16 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &w
         for (k = 0; k < batchSize; k++) {
             idx = sampleBuffer[k];
             w += -eta*gradBuffer[k]/batchSize*Xt.col(idx);
+        }
+        //compute error
+        if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+            auto endTime = Clock::now();
+            double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+            LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+            epochCounter = (epochCounter + 1) % PRINT_FREQ;
+            if (telapsed >= maxRunTime) {
+                return 1;
+            }
         }
     }
     delete[] sampleBuffer;

@@ -150,14 +150,16 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const Matr
 			d += (gradBuffer(k) - g(idx))*Xt.col(idx);
 			g(idx) = gradBuffer(k);
 		}
-		// if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-		// 	...
-		// 		LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
-		// 	epochCounter = (epochCounter + 1) % PRINT_FREQ;
-		// 	if (telapsed >= maxRunTime) {
-		// 		return 1;
-		// 	}
-		// }
+		//compute error
+		if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+			auto endTime = Clock::now();
+			double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+			LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+			epochCounter = (epochCounter + 1) % PRINT_FREQ;
+			if (telapsed >= maxRunTime) {
+				return 1;
+			}
+		}
 	}
 	delete[] sampleBuffer;
 	return 0;

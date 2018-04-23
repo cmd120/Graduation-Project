@@ -15,14 +15,20 @@ SAG_logistic(w,Xt,y,lambda,eta,d,g);
 % b - used to determine step sizes
 % gamma - used to determine step sizes
 % XtTest
-% ytest
+% yTest
 % maxRunTime
 % filename - saving results
 */
+int epochCounter;
+FILE *fp;
+auto startTime = Clock::now();
+
 void SAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
     const VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda, double eta, \
     int maxIter, int batchSize, int pass, int a, int b, int gamma,  int maxRunTime) {
     
+    startTime = Clock::now();
+
     int nVars, nSamples, flag;
     int epochCounter = 0;
     nVars = Xt.rows();
@@ -42,11 +48,16 @@ void SAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &X
         }
     }
     fclose(fp);
+   
+    auto endTime = Clock::now();
+    cout << "duration: " << chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION << endl;
+
+    return;
 }
 
 
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
+int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, VectorXd yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
 {
     long i, idx, j;
     double innerProd = 0 , tmpDelta, eta;
@@ -63,19 +74,21 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &
         d = d + (tmpDelta - g(idx)) * Xt.col(idx);
         g(idx) = tmpDelta;
 
-        // //compute error
-        // if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-        //  LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
-        //  epochCounter = (epochCounter + 1) % PRINT_FREQ;
-        //  if (telapsed >= maxRunTime) {
-        //      return 1;
-        //  }
-        // }
+        //compute error
+        if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+            auto endTime = Clock::now();
+            double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+            LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+            epochCounter = (epochCounter + 1) % PRINT_FREQ;
+            if (telapsed >= maxRunTime) {
+                return 1;
+            }
+        }
     }
     return 0;
 }
 
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize)
+int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, VectorXd yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize, int maxRunTime)
 {
     long i, idx, j, k;
     double innerProd, eta;
@@ -109,14 +122,16 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d
             d += (gradBuffer(k) - g(idx))*Xt.col(idx);
             g(idx) = gradBuffer(k);
         }
-        // if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-        //  ...
-        //      LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
-        //  epochCounter = (epochCounter + 1) % PRINT_FREQ;
-        //  if (telapsed >= maxRunTime) {
-        //      return 1;
-        //  }
-        // }
+        //compute error
+        if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+            auto endTime = Clock::now();
+            double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+            LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+            epochCounter = (epochCounter + 1) % PRINT_FREQ;
+            if (telapsed >= maxRunTime) {
+                return 1;
+            }
+        }
     }
     delete[] sampleBuffer;
     return 0;

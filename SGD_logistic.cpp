@@ -17,11 +17,16 @@ SGD_logistic(w,Xt,y,lambda,eta,d,g);
 % maxRunTime
 % filename - saving results
 */
+int epochCounter;
+FILE *fp;
+auto startTime = Clock::now();
 
-void SGD_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
-    const VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda, double eta, \
+void SGD_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
+     VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda, double eta, \
     int maxIter, int batchSize, int pass, int a, int b, int gamma,  int maxRunTime) {
     
+    startTime = Clock::now();
+
     int nVars, nSamples, flag;
     int epochCounter = 0;
     nVars = Xt.rows();
@@ -30,22 +35,28 @@ void SGD_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &X
     if (fp == NULL) {
         cout << "Cannot write results to file: " << filename << endl;
     }
+    epochCounter = 0;
     LogisticError(w, XtTest, yTest, 0, 0, fp);
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
     //为什么ret会在循环内部不断更新
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?InnerLoopBatchDense(w, Xt, y, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize):\
-                            InnerLoopSingleDense(w, Xt, y, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma);
+        flag = batchSize?InnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+                            InnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
         }
     }
     fclose(fp);
+
+    auto endTime = Clock::now();
+    cout << "duration: " << chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION << endl;
+
+    return;
 }
 
 
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
+int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
 {
     long i, idx, j;
     double innerProd = 0 , tmpDelta, eta;
@@ -71,7 +82,7 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &
     return 0;
 }
 
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize)
+int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize, int maxRunTime)
 {
     long i, idx, j, k;
     double innerProd, eta;

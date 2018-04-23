@@ -18,10 +18,15 @@ IAGA_ridge(w,Xt,y,lambda,eta,d,g);
 % maxRunTime
 % filename - saving results
 */
+int epochCounter;
+FILE *fp;
+auto startTime = Clock::now();
 
-void IAGA_ridge(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
+void IAGA_ridge(VectorXd &w, const MatrixXd &Xt, VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
     int maxIter, int batchSize, int pass, int a, int b, int gamma, const MatrixXd &XtTest, \
-    const VectorXd &yTest, int maxRunTime, string filename) {
+     VectorXd &yTest, int maxRunTime, string filename) {
+    
+    startTime = Clock::now();
 
     int nVars, nSamples, flag;
     int epochCounter = 0;
@@ -35,8 +40,8 @@ void IAGA_ridge(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double lambd
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
 
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?InnerLoopBatchDense(w, Xt, y, d, g, lambda, maxIter, nSamples, nVars, batchSize, pass, a, b, gamma):\
-                            InnerLoopSingleDense(w, Xt, y, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma);
+        flag = batchSize?InnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, batchSize, pass, a, b, gamma, maxRunTime):\
+                            InnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
         }
@@ -70,7 +75,7 @@ void IAGA_ridge(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double lambd
 // }
 
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma){
+int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime){
     long i, idx, j;
     double innerProd, tmpDelta, eta;
     Noise noise(0.0,sqrt(eta*2/nSamples));
@@ -89,10 +94,20 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, Vec
         d = d + (tmpDelta - g(idx)) * Xt.col(idx);
         
         g(idx) = tmpDelta;
+        //compute error
+        if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+            auto endTime = Clock::now();
+            double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+            LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+            epochCounter = (epochCounter + 1) % PRINT_FREQ;
+            if (telapsed >= maxRunTime) {
+                return 1;
+            }
+        }
     }
     return 0;
 }
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, VectorXd &d,  VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int batchSize, int pass, double a, double b, double gamma){
+int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d,  VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int batchSize, int pass, double a, double b, double gamma, int maxRunTime){
     long i, idx, j, k;
     double innerProd, eta;
 
@@ -119,6 +134,16 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, Vect
             idx = sampleBuffer[k];
             d += (gradBuffer(k) - g(idx))*Xt.col(idx);
             g(idx) = gradBuffer(k);
+        }
+        //compute error
+        if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+            auto endTime = Clock::now();
+            double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+            LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+            epochCounter = (epochCounter + 1) % PRINT_FREQ;
+            if (telapsed >= maxRunTime) {
+                return 1;
+            }
         }
     }
     delete[] sampleBuffer;

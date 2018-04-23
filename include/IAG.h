@@ -2,7 +2,7 @@
 #define IAG_H
 #include "comm.h"
 #include "LogisticError.h"
-
+#include "RidgeError.h"
 using namespace Eigen;
 using namespace std;
 

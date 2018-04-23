@@ -6,5 +6,5 @@
 
 using namespace Eigen;
 
-void RidgeError(const VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double epoch, double telapsed, FILE *fp);
+void RidgeError(const VectorXd &w, const MatrixXd &Xt, VectorXd &y, double epoch, double telapsed, FILE *fp);
 #endif
