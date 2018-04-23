@@ -42,8 +42,8 @@ void SIG_ridge(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTe
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
     //为什么ret会在循环内部不断更新
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?InnerLoopBatchDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
-                            InnerLoopSingleDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
+        flag = batchSize?SIG_RidgeInnerLoopBatchDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+                            SIG_RidgeInnerLoopSingleDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
         }
@@ -58,7 +58,7 @@ void SIG_ridge(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTe
 
 
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &wtilde, VectorXd &G, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
+int SIG_RidgeInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &wtilde, VectorXd &G, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
 {
     long i, idx, j;
     double innerProdI = 0 ,innerProdZ = 0, tmpDelta, eta;
@@ -90,7 +90,7 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const Mat
     return 0;
 }
 
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &wtilde, VectorXd &G, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize, int maxRunTime)
+int SIG_RidgeInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &wtilde, VectorXd &G, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize, int maxRunTime)
 {
     long i, idx, j, k;
     double innerProdI=0,innerProdZ=0, eta;

@@ -48,8 +48,8 @@ void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &
 	epochCounter = (epochCounter + 1) % PRINT_FREQ;
 	//为什么ret会在循环内部不断更新
 	for (int i = 0; i < pass; i++) {
-		flag = batchSize?InnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
-							InnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
+		flag = batchSize?IAG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+							IAG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
 		if (flag) {
 			break;
 		}
@@ -90,7 +90,7 @@ void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &
 // }
 
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
+int IAG_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
 {
 	long i, idx, j;
 	double innerProd = 0 , tmpDelta, eta;
@@ -120,7 +120,7 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const Mat
 	return 0;
 }
 
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize, int maxRunTime)
+int IAG_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize, int maxRunTime)
 {
 	long i, idx, j, k;
 	double innerProd, eta;
@@ -166,7 +166,7 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const Matr
 }
 
 
-// int InnerLoopSingleSparse(VectorXd &w, const SparseMatrix<double> &Xt, int *innerIndices, int *outerStarts, VectorXd y, double lambda, VectorXd d, double *g, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
+// int IAG_LogisticInnerLoopSingleSparse(VectorXd &w, const SparseMatrix<double> &Xt, int *innerIndices, int *outerStarts, VectorXd y, double lambda, VectorXd d, double *g, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
 // {
 // 	long i, j, idx;
 // 	double innerProd, tmpGrad, tmpFactor, eta;
@@ -276,7 +276,7 @@ int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const Matr
 //     delete[] outerStarts;
 // 	return 0;
 // }
-// int InnerLoopBatchSparse(VectorXd &w, const SparseMatrix<double> &Xt, int *innerIndices, int *outerStarts, VectorXd y, double lambda, VectorXd d, double *g, long maxIter, int nSamples, int nVars, int batchSize,int pass, double a, double b, double gamma)
+// int IAG_InnerLoopBatchSparse(VectorXd &w, const SparseMatrix<double> &Xt, int *innerIndices, int *outerStarts, VectorXd y, double lambda, VectorXd d, double *g, long maxIter, int nSamples, int nVars, int batchSize,int pass, double a, double b, double gamma)
 // {
 
 // }

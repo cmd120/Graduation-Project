@@ -39,8 +39,8 @@ void SGD_ridge(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtT
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
     //为什么ret会在循环内部不断更新
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?InnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
-                            InnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
+        flag = batchSize?SGD_RidgeInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+                            SGD_RidgeInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
         }
@@ -55,7 +55,7 @@ void SGD_ridge(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtT
 
 
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
+int SGD_RidgeInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma)
 {
     long i, idx, j;
     double innerProd = 0 , tmpDelta, eta;
@@ -81,7 +81,7 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const Mat
     return 0;
 }
 
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize)
+int SGD_RidgeInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize)
 {
     long i, idx, j, k;
     double innerProd, eta;

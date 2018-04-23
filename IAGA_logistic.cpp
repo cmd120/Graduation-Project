@@ -22,9 +22,9 @@ int epochCounter;
 FILE *fp;
 auto startTime = Clock::now();
 
-void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
+void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
     int maxIter, int batchSize, int pass, int a, int b, int gamma, const MatrixXd &XtTest, \
-    const VectorXd &yTest, int maxRunTime, string filename) {
+     VectorXd &yTest, int maxRunTime, string filename) {
     
     startTime = Clock::now();
 
@@ -41,8 +41,8 @@ void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double la
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
 
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?InnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, batchSize, pass, a, b, gamma, batchSize):\
-                            InnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize);
+        flag = batchSize?IAGA_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+                            IAGA_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
         }
@@ -82,7 +82,7 @@ void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double la
 // }
 
 
-int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize){
+int IAGA_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime){
     long i, idx, j;
     double innerProd, tmpDelta, eta;
     Noise noise(0.0,sqrt(eta*2/nSamples));
@@ -114,7 +114,7 @@ int InnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, con
     }
     return 0;
 }
-int InnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d,  VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int batchSize, int pass, double a, double b, double gamma, int batchSize){
+int IAGA_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d,  VectorXd &g, double lambda, long maxIter, int nSamples, int nVars,int pass, double a, double b, double gamma, int batchSize, int maxRunTime){
     long i, idx, j, k;
     double innerProd, eta;
 

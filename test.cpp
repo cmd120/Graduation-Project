@@ -3,6 +3,7 @@
 #include "include/SparseMat.h"
 #include "include/MNIST_Read.h"
 #include "include/IAG.h"
+#include "include/SGD.h"
 
 
 int main()
@@ -30,7 +31,8 @@ int main()
     VectorXd y_test(Vtdata);
     cout << (int)Vtdata(0) <<endl;
     VectorXd y = Vtdata;
-    IAG_logistic(w, Mtdata, y, Xt_test, y_test, d, g, filename);
+    // IAG_logistic(w, Mtdata, y, Xt_test, y_test, d, g, filename);
+    SGD_logistic(w, Mtdata, y, Xt_test, y_test, d, g, filename);
     // VectorXd a(3),b(3);
     // a(0) = 1;
     // a(1) = 2;
