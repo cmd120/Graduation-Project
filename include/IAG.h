@@ -7,8 +7,8 @@ using namespace Eigen;
 using namespace std;
 
 void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
-	VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda=0.1, double eta=0.1, \
-	int maxIter=60, int batchSize=1, int pass=20, int a=1, int b=1, int gamma=1,  int maxRunTime=200);
+	VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda=0.035, double eta=0.1, \
+	int batchSize=1, int pass=10, double a=1e-2, double b=0, double gamma=0,  int maxRunTime=60);
 
 void IAG_logistic(VectorXd &w, const SparseMatrix<double> &Xt, int* innerIndices, int* outerStarts, const VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
 	int maxIter, int batchSize, int pass, int a, int b, int gamma, const MatrixXd &XtTest, \

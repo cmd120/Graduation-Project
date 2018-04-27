@@ -1,20 +1,18 @@
 #include "include/DenseMat.h"
 
-VectorXd LogisticPartialGradient(VectorXd &innerProdI, VectorXd &y)
+VectorXd LogisticPartialGradient(VectorXd &innerProd, VectorXd &y)
 {
-	return 1/(1+(-innerProdI).array().exp()) - y.array();
+	return (1+(-innerProd).array().exp()).inverse() - y.array();
     
-    // return 1/(1 + exp(-innerProdI)) - y;
 }
-double LogisticPartialGradient(double innerProdI, double y) {
-	return 1 / (1 + exp(-innerProdI)) - y;
+double LogisticPartialGradient(double innerProd, double y) {
+	return 1 / (1 + exp(-innerProd)) - y;
 }
 
 VectorXd RidgePartialGradient(VectorXd &innerProd, VectorXd &y)
 {
 	return innerProd - y;
     
-    // return 1/(1 + exp(-innerProdI)) - y;
 }
 double RidgePartialGradient(double innerProd, double y) {
 	return innerProd - y;

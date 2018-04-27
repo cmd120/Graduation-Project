@@ -13,8 +13,8 @@
 #include "Noise.h"
 
 
-#define NOISY 1  // 0 for optimization, 1 for bayes model
-#define PRINT_FREQ 50 // print test error 10 times per epoch
+#define NOISY 0  // 0 for optimization, 1 for bayes model
+#define PRINT_FREQ 50 // print test error 50 times per epoch
 #define BILLION  1E9
 #define FILE_NAME_LENGTH 64
 #define ACCURACY 10E-5
@@ -25,7 +25,8 @@ using Clock = std::chrono::high_resolution_clock;
 #endif
 //Linux/Unix timer resolution
 #if defined(__linux__) || defined(__unix) || defined(__unix__)
-// 
+// temporary
+using Clock = std::chrono::high_resolution_clock;
 #endif
 // void LogisticGradient(double *w, const mxArray *XtArray, double *y, double *G);
 

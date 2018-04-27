@@ -5,34 +5,91 @@
 #include "include/IAG.h"
 #include "include/SGD.h"
 
+void removeRow(MatrixXd& matrix, unsigned int rowToRemove)
+{
+    unsigned int numRows = matrix.rows()-1;
+    unsigned int numCols = matrix.cols();
 
+    if( rowToRemove < numRows )
+        matrix.block(rowToRemove,0,numRows-rowToRemove,numCols) = matrix.block(rowToRemove+1,0,numRows-rowToRemove,numCols);
+
+    matrix.conservativeResize(numRows,numCols);
+}
+
+void removeColumn(MatrixXd& matrix, unsigned int colToRemove)
+{
+    unsigned int numRows = matrix.rows();
+    unsigned int numCols = matrix.cols()-1;
+
+    if( colToRemove < numCols )
+        matrix.block(0,colToRemove,numRows,numCols-colToRemove) = matrix.block(0,colToRemove+1,numRows,numCols-colToRemove);
+
+    matrix.conservativeResize(numRows,numCols);
+}
 int main()
 {	
+	int i;
+    string train_image_path = "train-images";
+    string train_label_path = "train-labels";
     string test_image_path = "test-images";
     string test_label_path = "test-labels";
-    vector<BYTE> test_image_dataset = read_mnist_images(test_image_path);
+    vector<BYTE> train_image_dataset = read_mnist_images(train_image_path);
+    vector<BYTE> train_label_dataset = read_mnist_labels(train_label_path);
+ 	vector<BYTE> test_image_dataset = read_mnist_images(test_image_path);
     vector<BYTE> test_label_dataset = read_mnist_labels(test_label_path);
     // cout << "SPARSE: " << IsSparseMat<BYTE>(test_image_dataset) << endl;
     // cout << "SPARSE: " << endl;
     // MatrixXd Mdata(_dataset.data(),28,_dataset.size()/28);
-    vector<double> Xt_data(test_image_dataset.begin(),test_image_dataset.end());
-    vector<double> y_data(test_label_dataset.begin(),test_label_dataset.end());
-    Map<Matrix<double,Dynamic,Dynamic,RowMajor>> Mtdata(Xt_data.data(), Xt_data.size()/28, 28);
-    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> Vtdata(y_data.data(), y_data.size(), 1);
-    VectorXd w,d,g;
-    w = MatrixXd::Zero(Mtdata.rows(),1);
+    vector<double> Xt_train(train_image_dataset.begin(),train_image_dataset.end());
+    vector<double> y_train(train_label_dataset.begin(),train_label_dataset.end());
+    vector<double> Xt_test(test_image_dataset.begin(),test_image_dataset.end());
+    vector<double> y_test(test_label_dataset.begin(),test_label_dataset.end());
+    
+    vector<double> Xt_train_classify,y_train_classify,Xt_test_classify,y_test_classify;
+    for(i=0;i<y_train.size();++i){
+    	if(y_train[i]<=1){
+    		Xt_train_classify.insert(Xt_train_classify.end(),Xt_train.begin()+i*784,Xt_train.begin()+(i+1)*784);
+    		y_train_classify.push_back(y_train[i]);
+    	}
+    }
+    for(i=0;i<y_test.size();++i){
+    	if(y_test[i]<=1){
+    		Xt_test_classify.insert(Xt_test_classify.end(),Xt_test.begin()+i*784,Xt_test.begin()+(i+1)*784);
+    		y_test_classify.push_back(y_test[i]);
+    	}
+    }
+    // Map<Matrix<double,Dynamic,Dynamic,ColMajor>> Xt(Xt_train.data(), 784, Xt_train.size()/784);
+    // Map<Matrix<double,Dynamic,Dynamic,ColMajor>> y(y_train.data(), y_train.size(), 1);
+    // Map<Matrix<double,Dynamic,Dynamic,ColMajor>> XtTest(Xt_test.data(), 784, Xt_test.size()/784);
+    // Map<Matrix<double,Dynamic,Dynamic,ColMajor>> yTest(y_test.data(), y_test.size(), 1);
+    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> Xt(Xt_train_classify.data(), 784, Xt_train_classify.size()/784);
+    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> y(y_train_classify.data(), y_train_classify.size(), 1);
+    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> XtTest(Xt_test_classify.data(), 784, Xt_test_classify.size()/784);
+    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> yTest(y_test_classify.data(), y_test_classify.size(), 1);
+	//normalization
+    for(i=0;i<Xt.cols();++i){
+    	Xt.col(i) = Xt.col(i)/Xt.col(i).norm();
+    }
+    for(i=0;i<XtTest.size()/784;++i){
+    	XtTest.col(i) = XtTest.col(i)/XtTest.col(i).norm();
+    }
+    VectorXd yy = y;
+    VectorXd yyTest = yTest;
+    VectorXd w,sumIG(Xt.rows()),gradients(Xt.cols());
+    w = MatrixXd::Zero(Xt.rows(),1);
     w = VectorXd(w);
-    d = MatrixXd::Zero(Mtdata.rows(),1);
-    d = VectorXd(d);
-    g = MatrixXd::Zero(Mtdata.rows(),1);
-    g = VectorXd(g);
+    gradients = (1+(-Xt.adjoint()*w).array().exp()).inverse() - y.array();
+    sumIG = Xt*gradients;
     string filename = "dong";
-    MatrixXd Xt_test(Mtdata);
-    VectorXd y_test(Vtdata);
-    cout << (int)Vtdata(0) <<endl;
-    VectorXd y = Vtdata;
-    // IAG_logistic(w, Mtdata, y, Xt_test, y_test, d, g, filename);
-    SGD_logistic(w, Mtdata, y, Xt_test, y_test, d, g, filename);
+    cout << "enter IAG" << endl;
+    cout << "Xt rows: " << Xt.rows() << "Xt cols: " << Xt.cols() << endl;
+    cout << "XtTest rows: " << XtTest.rows() << "XtTest cols: " << XtTest.cols() << endl;
+    cout << "y cols: " << yy.size() << endl;
+    cout << "yTest cols: " << yyTest.size() << endl;
+    IAG_logistic(w, Xt, yy, XtTest, yyTest, sumIG, gradients, filename);
+    return 0;
+    // cout << Xt.col(0) << endl;
+    // SGD_logistic(w, Mtdata, y, Xt_test, y_test, d, g, filename);
     // VectorXd a(3),b(3);
     // a(0) = 1;
     // a(1) = 2;

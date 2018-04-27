@@ -30,13 +30,14 @@ auto startTime = Clock::now();
 
 
 void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
-	 VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda, double eta, \
-	int maxIter, int batchSize, int pass, int a, int b, int gamma,  int maxRunTime) {
+	 VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
+	 int batchSize, int pass, double a, double b, double gamma,  int maxRunTime) {
 	
 	startTime = Clock::now();
 
 	int nVars, nSamples, flag;
 	int epochCounter = 0;
+	// cout << "a b gamma" << a << " " << b << " " << gamma <<endl;
 	nVars = Xt.rows();
 	nSamples = Xt.cols();
 	fp = fopen(filename.c_str(), "a");
@@ -46,15 +47,14 @@ void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &
 	epochCounter = 0;
 	LogisticError(w, XtTest, yTest, 0, 0, fp);
 	epochCounter = (epochCounter + 1) % PRINT_FREQ;
-	//为什么ret会在循环内部不断更新
 	for (int i = 0; i < pass; i++) {
-		flag = batchSize?IAG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
-							IAG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
+		flag = batchSize>=2?IAG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, 2*nSamples, nSamples, nVars, i, a, b, gamma, batchSize, maxRunTime):\
+							IAG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, 2*nSamples, nSamples, nVars, i, a, b, gamma, maxRunTime);
 		if (flag) {
 			break;
 		}
 	}
-	cout << "point 3" << endl;
+	// cout << "point 3" << endl;
 	fclose(fp);
 
 	auto endTime = Clock::now();
@@ -92,21 +92,29 @@ void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &
 
 int IAG_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
 {
+	// cout << "enter IAG_LogisticInnerLoopSingleDense" << endl;
 	long i, idx, j;
 	double innerProd = 0 , tmpDelta, eta;
-	Noise noise(0.0, sqrt(eta * 2 / nSamples));
 	for (i = 0; i < maxIter; i++) {
+		// cout << "a b gamma" << a << " " << b << " " << gamma <<endl;
 		eta = a * pow(b + i + 1, -gamma);
+		Noise noise(0.0, sqrt(eta * 2 / nSamples));
+		// cout << "eta:" << eta << endl;
 		idx = i % nSamples;
 		innerProd = Xt.col(idx).dot(w);
 		tmpDelta = LogisticPartialGradient(innerProd, y(idx));
+		// cout << "tmpDelta" << tmpDelta <<endl;
 		w = -eta/nSamples*d+(1-eta*lambda)*w;
+		// cout << "noise" << noise.gen() <<endl;
 		w = NOISY?w.array()+noise.gen():w;
+		// cout << "w + add ?:" << (-eta) * (tmpDelta - g(idx)) / nSamples * Xt.col(idx) << endl;
 		w = w + (-eta) * (tmpDelta - g(idx)) / nSamples * Xt.col(idx);
+		// cout << "w: " << w << endl;
 		d = d + (tmpDelta - g(idx)) * Xt.col(idx);
 		g(idx) = tmpDelta;
-
+		// cout << "point pass" << endl;
 		//compute error
+		// cout << "w: " << w << endl;
 		if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
 			auto endTime = Clock::now();
 			double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
@@ -117,6 +125,7 @@ int IAG_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &
 			}
 		}
 	}
+	// cout << "leave IAG_LogisticInnerLoopSingleDense" << endl;
 	return 0;
 }
 
@@ -215,7 +224,7 @@ int IAG_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y
 
 // 		/* Step 3: approximate w_{i+1} */
 // 		tmpFactor = eta / c / nSamples * (tmpGrad - g(idx));  // @NOTE biased estimator
-// 		//该如何转换成Eigen的表达，可以考虑提问
+// 		
 // 		cblas_daxpyi(outerStarts[idx + 1] - outerStarts[idx], -tmpFactor, Xt + outerStarts[idx], (int *)(innerIndices + outerStarts[idx]), w);
 // 		// @NOTE (int *) here is 64bit because mwIndex is 64bit, and we have to link libmkl_intel_ilp64.a for 64bit integer
 
