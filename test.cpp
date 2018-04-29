@@ -3,7 +3,11 @@
 #include "include/SparseMat.h"
 #include "include/MNIST_Read.h"
 #include "include/IAG.h"
+#include "include/IAGA.h"
 #include "include/SGD.h"
+#include "include/SAG.h"
+#include "include/SIG.h"
+#include "include/SVRG"
 
 void removeRow(MatrixXd& matrix, unsigned int rowToRemove)
 {
@@ -87,9 +91,14 @@ int main()
     cout << "y cols: " << yy.size() << endl;
     cout << "yTest cols: " << yyTest.size() << endl;
     IAG_logistic(w, Xt, yy, XtTest, yyTest, sumIG, gradients, filename);
+    IAGA_logistic(w, Xt, yy, XtTest, yyTest, sumIG, gradients, filename);
+    SIG_logistic(w, Xt, yy, XtTest, yyTest, sumIG, gradients, filename);
+    SAG_logistic(w, Xt, yy, XtTest, yyTest, sumIG, gradients, filename);
+    SGD_logistic(w, Xt, yy, XtTest, yyTest, sumIG, gradients, filename);
+    SVRG_logistic(w, Xt, yy, XtTest, yyTest, sumIG, gradients, filename);
     return 0;
     // cout << Xt.col(0) << endl;
-    // SGD_logistic(w, Mtdata, y, Xt_test, y_test, d, g, filename);
+    
     // VectorXd a(3),b(3);
     // a(0) = 1;
     // a(1) = 2;

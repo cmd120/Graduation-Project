@@ -22,8 +22,8 @@ FILE *fp;
 auto startTime = Clock::now();
 
 void SGD_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
-     VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda, double eta, \
-    int maxIter, int batchSize, int pass, int a, int b, int gamma,  int maxRunTime) {
+     VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
+    int maxIter, int batchSize, int pass, double a, double b, int gamma,  int maxRunTime) {
     
     startTime = Clock::now();
 
@@ -40,7 +40,7 @@ void SGD_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
     //为什么ret会在循环内部不断更新
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?SGD_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+        flag = batchSize>=2?SGD_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
                             SGD_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
@@ -69,15 +69,16 @@ int SGD_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &
         tmpDelta = LogisticPartialGradient(innerProd, y(idx));
         w = -eta*tmpDelta*Xt.col(idx)+(1-eta*lambda)*w;
         w = NOISY?w.array()+noise.gen():w;
-        
-        // //compute error
-        // if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-        //  LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
-        //  epochCounter = (epochCounter + 1) % PRINT_FREQ;
-        //  if (telapsed >= maxRunTime) {
-        //      return 1;
-        //  }
-        // }
+        //compute error
+        if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+            auto endTime = Clock::now();
+            double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+            LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+            epochCounter = (epochCounter + 1) % PRINT_FREQ;
+            if (telapsed >= maxRunTime) {
+                return 1;
+            }
+        }
     }
     return 0;
 }
@@ -89,13 +90,10 @@ int SGD_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y
 
     VectorXd gradBuffer(batchSize);
     int* sampleBuffer = new int[batchSize];
-
     Noise idxSample(0,nSamples-1);
-    Noise noise(0.0, sqrt(eta * 2 / nSamples));
-    
     for (i = 0; i < maxIter;i++) {
         eta = a * pow(b + i + 1, -gamma);
-        
+        Noise noise(0.0, sqrt(eta * 2 / nSamples));    
         for (k = 0; k < batchSize; k++) {
             idx = idxSample.gen();
             sampleBuffer[k] = idx;
@@ -111,14 +109,16 @@ int SGD_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y
             idx = sampleBuffer[k];
             w += (-eta * gradBuffer(k)  / batchSize)*Xt.col(idx);
         }
-        // if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-        //  ...
-        //      LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
-        //  epochCounter = (epochCounter + 1) % PRINT_FREQ;
-        //  if (telapsed >= maxRunTime) {
-        //      return 1;
-        //  }
-        // }
+        //compute error
+        if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
+            auto endTime = Clock::now();
+            double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+            LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
+            epochCounter = (epochCounter + 1) % PRINT_FREQ;
+            if (telapsed >= maxRunTime) {
+                return 1;
+            }
+        }
     }
     delete[] sampleBuffer;
     return 0;

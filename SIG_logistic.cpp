@@ -24,8 +24,8 @@ FILE *fp;
 auto startTime = Clock::now();
 
 void SIG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
-     VectorXd &yTest, VectorXd wtilde, VectorXd G, string filename, double lambda, double eta, \
-    int maxIter, int batchSize, int pass, int a, int b, int gamma,  int maxRunTime) {
+     VectorXd &yTest, VectorXd& wtilde, VectorXd& G, string filename, double lambda, double eta, \
+    int maxIter, int batchSize, int pass, double a, double b, int gamma,  int maxRunTime) {
     
     startTime = Clock::now();
 
@@ -42,7 +42,7 @@ void SIG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &X
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
     //为什么ret会在循环内部不断更新
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?SIG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+        flag = batchSize>=2?SIG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
                             SIG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
@@ -62,9 +62,9 @@ int SIG_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &
 {
     long i, idx, j;
     double innerProdI = 0 ,innerProdZ = 0, tmpDelta, eta;
-    Noise noise(0.0, sqrt(eta * 2 / nSamples));
     for (i = 0; i < maxIter; i++) {
         eta = a * pow(b + pass*1.0*maxIter + i + 1, -gamma);
+        Noise noise(0.0, sqrt(eta * 2 / nSamples));
         idx = i % nSamples;
         for(j=0;j<nVars;++j){
             innerProdI += w(j)*Xt.col(idx)(j);

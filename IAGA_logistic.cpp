@@ -22,9 +22,9 @@ int epochCounter;
 FILE *fp;
 auto startTime = Clock::now();
 
-void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
-    int maxIter, int batchSize, int pass, int a, int b, int gamma, const MatrixXd &XtTest, \
-     VectorXd &yTest, int maxRunTime, string filename) {
+void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
+     VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
+    int maxIter, int batchSize, int pass, double a, double b, int gamma, int maxRunTime) {
     
     startTime = Clock::now();
 
@@ -41,8 +41,8 @@ void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, double lambda, 
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
 
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?IAGA_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
-                            IAGA_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
+        flag = batchSize>=2?IAGA_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, 2*nSamples, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+                            IAGA_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, 2*nSamples, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
         }
@@ -84,10 +84,10 @@ void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, double lambda, 
 
 int IAGA_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime){
     long i, idx, j;
-    double innerProd, tmpDelta, eta;
-    Noise noise(0.0,sqrt(eta*2/nSamples));
+    double innerProd=0, tmpDelta, eta;
     for (i = 0; i < maxIter; i++) {
         eta = a * pow(b + i + 1, -gamma);
+        Noise noise(0.0,sqrt(eta*2/nSamples));
         idx = i % nSamples;
         innerProd = Xt.col(idx).dot(w);
         tmpDelta = LogisticPartialGradient(innerProd, y(idx));

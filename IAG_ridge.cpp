@@ -24,8 +24,8 @@ FILE *fp;
 auto startTime = Clock::now();
 
 void IAG_ridge(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
-     VectorXd &yTest, VectorXd d, VectorXd g, string filename, double lambda, double eta, \
-    int maxIter, int batchSize, int pass, int a, int b, int gamma,  int maxRunTime) {
+     VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
+    int maxIter, int batchSize, int pass, double a, double b, int gamma,  int maxRunTime) {
     
     startTime = Clock::now();
 

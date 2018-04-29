@@ -25,7 +25,7 @@ auto startTime = Clock::now();
 
 void SVRG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
      VectorXd &yTest, VectorXd wtilde, VectorXd G, string filename, double lambda, double eta, \
-    int maxIter, int batchSize, int pass, int a, int b, int gamma,  int maxRunTime) {
+    int maxIter, int batchSize, int pass, double a, double b, int gamma,  int maxRunTime) {
     
     startTime = Clock::now();
 
@@ -42,7 +42,7 @@ void SVRG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
     //为什么ret会在循环内部不断更新
     for (int i = 0; i < pass; i++) {
-        flag = batchSize?SVRG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+        flag = batchSize>=2?SVRG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
                             SVRG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
         if (flag) {
             break;
@@ -62,9 +62,9 @@ int SVRG_LogisticInnerLoopSingleDense(VectorXd &w,const MatrixXd &Xt, VectorXd &
     long i, idx, j;
     double innerProdI = 0, innerProdZ=0, tmpDelta, eta;
     Noise idxSample(0,nSamples-1);
-    Noise noise(0.0, sqrt(eta * 2 / nSamples));
     for (i = 0; i < maxIter; i++) {
         eta = a * pow(b + pass*1.0*maxIter +i + 1, -gamma);
+        Noise noise(0.0, sqrt(eta * 2 / nSamples));
         idx = idxSample.gen();
         for(j=0;j<nVars;++i){
             innerProdI += w(j) * Xt.col(idx)(j);
@@ -100,10 +100,9 @@ int SVRG_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &
     int* sampleBuffer = new int[batchSize];
 
     Noise idxSample(0, nSamples-1);
-    Noise noise(0.0, sqrt(eta * 2 / nSamples));
     for (i = 0; i < maxIter;i++) {
         eta = a * pow(b + pass*1.0*maxIter + i + 1, -gamma);
-        
+        Noise noise(0.0, sqrt(eta * 2 / nSamples));
         for (k = 0; k < batchSize; k++) {
             idx = idxSample.gen();
             sampleBuffer[k] = idx;
