@@ -17,42 +17,39 @@ SGD_logistic(w,Xt,y,lambda,eta,d,g);
 % maxRunTime
 % filename - saving results
 */
-int epochCounter;
-FILE *fp;
-auto startTime = Clock::now();
 
-void SGD_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
-     VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
-    int maxIter, int batchSize, int pass, double a, double b, int gamma,  int maxRunTime) {
+// void SGD_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
+//      VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
+//     int maxIter, int batchSize, int pass, double a, double b, int gamma,  int maxRunTime) {
     
-    startTime = Clock::now();
+//     startTime = Clock::now();
 
-    int nVars, nSamples, flag;
-    int epochCounter = 0;
-    nVars = Xt.rows();
-    nSamples = Xt.cols();
-    FILE *fp = fopen(filename.c_str(), "a");
-    if (fp == NULL) {
-        cout << "Cannot write results to file: " << filename << endl;
-    }
-    epochCounter = 0;
-    LogisticError(w, XtTest, yTest, 0, 0, fp);
-    epochCounter = (epochCounter + 1) % PRINT_FREQ;
-    //为什么ret会在循环内部不断更新
-    for (int i = 0; i < pass; i++) {
-        flag = batchSize>=2?SGD_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
-                            SGD_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
-        if (flag) {
-            break;
-        }
-    }
-    fclose(fp);
+//     int nVars, nSamples, flag;
+//     int epochCounter = 0;
+//     nVars = Xt.rows();
+//     nSamples = Xt.cols();
+//     FILE *fp = fopen(filename.c_str(), "a");
+//     if (fp == NULL) {
+//         cout << "Cannot write results to file: " << filename << endl;
+//     }
+//     epochCounter = 0;
+//     LogisticError(w, XtTest, yTest, 0, 0, fp);
+//     epochCounter = (epochCounter + 1) % PRINT_FREQ;
+//     //为什么ret会在循环内部不断更新
+//     for (int i = 0; i < pass; i++) {
+//         flag = batchSize>=2?SGD_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, batchSize, maxRunTime):\
+//                             SGD_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
+//         if (flag) {
+//             break;
+//         }
+//     }
+//     fclose(fp);
 
-    auto endTime = Clock::now();
-    cout << "duration: " << chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION << endl;
+//     auto endTime = Clock::now();
+//     cout << "duration: " << chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION << endl;
 
-    return;
-}
+//     return;
+// }
 
 
 

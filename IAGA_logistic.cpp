@@ -18,9 +18,6 @@ IAGA_logistic(w,Xt,y,lambda,eta,d,g);
 % maxRunTime
 % filename - saving results
 */
-int epochCounter;
-FILE *fp;
-auto startTime = Clock::now();
 
 void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
      VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \

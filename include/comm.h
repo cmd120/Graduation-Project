@@ -19,6 +19,10 @@
 #define FILE_NAME_LENGTH 64
 #define ACCURACY 10E-5
 
+extern int epochCounter;
+extern FILE *fp;
+extern std::chrono::high_resolution_clock::time_point startTime;
+extern int SPARSE;
 //Windows timer resolution
 #if defined(_WIN32) || defined(_WIN64)
 using Clock = std::chrono::high_resolution_clock;
@@ -27,6 +31,7 @@ using Clock = std::chrono::high_resolution_clock;
 #if defined(__linux__) || defined(__unix) || defined(__unix__)
 // temporary
 using Clock = std::chrono::high_resolution_clock;
+//when extern variables placed here, endif seems not match to the previous unmatched one but closest one??
 #endif
 // void LogisticGradient(double *w, const mxArray *XtArray, double *y, double *G);
 

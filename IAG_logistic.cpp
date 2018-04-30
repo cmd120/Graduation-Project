@@ -24,44 +24,42 @@ IAG_logistic(w,Xt,y,lambda,eta,d,g);
 // //balabala
 // auto t2 = Clock::now();
 // cout << "Delta t2-t1: " << chrono::duration_cast<chrono::nanoseconds>(t2-t1).count() << endl;
-int epochCounter;
-FILE *fp;
-auto startTime = Clock::now();
 
 
-void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
-	 VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
-	 int batchSize, int pass, double a, double b, double gamma,  int maxRunTime) {
+
+// void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
+// 	 VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
+// 	 int batchSize, int pass, double a, double b, double gamma,  int maxRunTime) {
 	
-	startTime = Clock::now();
+// 	startTime = Clock::now();
 
-	int nVars, nSamples, flag;
-	int epochCounter = 0;
-	// cout << "a b gamma" << a << " " << b << " " << gamma <<endl;
-	nVars = Xt.rows();
-	nSamples = Xt.cols();
-	fp = fopen(filename.c_str(), "a");
-	if (fp == NULL) {
-		cout << "Cannot write results to file: " << filename << endl;
-	}
-	epochCounter = 0;
-	LogisticError(w, XtTest, yTest, 0, 0, fp);
-	epochCounter = (epochCounter + 1) % PRINT_FREQ;
-	for (int i = 0; i < pass; i++) {
-		flag = batchSize>=2?IAG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, 2*nSamples, nSamples, nVars, i, a, b, gamma, batchSize, maxRunTime):\
-							IAG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, 2*nSamples, nSamples, nVars, i, a, b, gamma, maxRunTime);
-		if (flag) {
-			break;
-		}
-	}
-	// cout << "point 3" << endl;
-	fclose(fp);
+// 	int nVars, nSamples, flag;
+// 	int epochCounter = 0;
+// 	// cout << "a b gamma" << a << " " << b << " " << gamma <<endl;
+// 	nVars = Xt.rows();
+// 	nSamples = Xt.cols();
+// 	fp = fopen(filename.c_str(), "a");
+// 	if (fp == NULL) {
+// 		cout << "Cannot write results to file: " << filename << endl;
+// 	}
+// 	epochCounter = 0;
+// 	LogisticError(w, XtTest, yTest, 0, 0, fp);
+// 	epochCounter = (epochCounter + 1) % PRINT_FREQ;
+// 	for (int i = 0; i < pass; i++) {
+// 		flag = batchSize>=2?IAG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, d, g, lambda, 2*nSamples, nSamples, nVars, i, a, b, gamma, batchSize, maxRunTime):\
+// 							IAG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, d, g, lambda, 2*nSamples, nSamples, nVars, i, a, b, gamma, maxRunTime);
+// 		if (flag) {
+// 			break;
+// 		}
+// 	}
+// 	// cout << "point 3" << endl;
+// 	fclose(fp);
 
-	auto endTime = Clock::now();
-	cout << "duration: " << chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION << endl;
+// 	auto endTime = Clock::now();
+// 	cout << "duration: " << chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION << endl;
 
-	return;
-}
+// 	return;
+// }
 // void IAG_logistic(VectorXd &w, const SparseMatrix<double> &Xt, int* innerIndices, int* outerStarts, const VectorXd &y, double lambda, double eta, VectorXd d, VectorXd g, \
 // 	int maxIter, int batchSize, int pass, int a, int b, int gamma, const MatrixXd &XtTest, \
 // 	const VectorXd &yTest, int maxRunTime, string filename){
