@@ -18,15 +18,6 @@ IAG_logistic(w,Xt,y,lambda,eta,d,g);
 % maxRunTime
 % filename - saving results
 */
-
-// chrono example
-// auto t1 = Clock::now();
-// //balabala
-// auto t2 = Clock::now();
-// cout << "Delta t2-t1: " << chrono::duration_cast<chrono::nanoseconds>(t2-t1).count() << endl;
-
-
-
 // void IAG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
 // 	 VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
 // 	 int batchSize, int pass, double a, double b, double gamma,  int maxRunTime) {
@@ -86,57 +77,71 @@ IAG_logistic(w,Xt,y,lambda,eta,d,g);
 // 	}
 // 	fclose(fp);
 // }
-
+void IAG_init(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest, double &lambda, double &eta, double &a, double &b, double &gamma,\
+	int &maxIter, int &batchSize, int &passes, int &maxRunTime, string &filename){
+	startTime = Clock::now();
+	cout << "Input batchSize: " << endl;
+	cin >> batchSize;
+	filename = "IAG_output_"+to_string(batchSize);
+    fp = fopen(filename.c_str(), "a");
+    if (fp == NULL) {
+        cout << "Cannot write results to file: " << filename << endl;
+    }
+    LogisticError(w, XtTest, yTest, 0, 0, fp);
+    epochCounter = (epochCounter + 1) % PRINT_FREQ;
+	lambda = 1/Xt.cols();
+	eta = 0.1;
+	a = batchSize>=2?1:1e-2;
+	b = 0;
+	gamma = 0;
+	maxIter = 2*Xt.cols();
+	passes = 10;
+	maxRunTime = 60;
+	return;
+}
 
 int IAG_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
 {
 	// cout << "enter IAG_LogisticInnerLoopSingleDense" << endl;
 	long i, idx, j;
-	double innerProd = 0 , tmpDelta, eta;
+	double innerProd = 0 , tmpDelta, eta, telapsed;
+	auto endTime = Clock::now();
 	for (i = 0; i < maxIter; i++) {
-		// cout << "a b gamma" << a << " " << b << " " << gamma <<endl;
 		eta = a * pow(b + i + 1, -gamma);
 		Noise noise(0.0, sqrt(eta * 2 / nSamples));
-		// cout << "eta:" << eta << endl;
 		idx = i % nSamples;
 		innerProd = Xt.col(idx).dot(w);
 		tmpDelta = LogisticPartialGradient(innerProd, y(idx));
-		// cout << "tmpDelta" << tmpDelta <<endl;
 		w = -eta/nSamples*d+(1-eta*lambda)*w;
-		// cout << "noise" << noise.gen() <<endl;
 		w = NOISY?w.array()+noise.gen():w;
-		// cout << "w + add ?:" << (-eta) * (tmpDelta - g(idx)) / nSamples * Xt.col(idx) << endl;
 		w = w + (-eta) * (tmpDelta - g(idx)) / nSamples * Xt.col(idx);
-		// cout << "w: " << w << endl;
 		d = d + (tmpDelta - g(idx)) * Xt.col(idx);
 		g(idx) = tmpDelta;
-		// cout << "point pass" << endl;
 		//compute error
-		// cout << "w: " << w << endl;
 		if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-			auto endTime = Clock::now();
-			double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+			endTime = Clock::now();
+			telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
 			LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
 			epochCounter = (epochCounter + 1) % PRINT_FREQ;
 			if (telapsed >= maxRunTime) {
+				cout << "total telapsed: " << telapsed << endl;
 				return 1;
 			}
 		}
 	}
-	// cout << "leave IAG_LogisticInnerLoopSingleDense" << endl;
 	return 0;
 }
 
 int IAG_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int batchSize, int maxRunTime)
 {
 	long i, idx, j, k;
-	double innerProd, eta;
-
+	double innerProd, eta, telapsed;
+	auto endTime = Clock::now();
 	VectorXd gradBuffer(batchSize);
 	int* sampleBuffer = new int[batchSize];
-	Noise noise(0.0, sqrt(eta * 2 / nSamples));
 	for (i = 0; i < maxIter;i++) {
 		eta = a * pow(b + i + 1, -gamma);
+		Noise noise(0.0, sqrt(eta * 2 / nSamples));
 		for (k = 0; k < batchSize; k++) {
 			idx = (i*batchSize + k) % nSamples;
 			sampleBuffer[k] = idx;
@@ -152,6 +157,7 @@ int IAG_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y
 			idx = sampleBuffer[k];
 			w += (-eta * (gradBuffer(k) - g(idx)) / nSamples)*Xt.col(idx);
 		}
+		// cout << "w: " << w << endl;
 		for (k = 0; k < batchSize; k++) {
 			idx = sampleBuffer[k];
 			d += (gradBuffer(k) - g(idx))*Xt.col(idx);
@@ -159,8 +165,9 @@ int IAG_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &y
 		}
 		//compute error
 		if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-			auto endTime = Clock::now();
-			double telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
+			// cout << "w: " << w << endl;
+			endTime = Clock::now();
+			telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime-startTime).count()/BILLION;
 			LogisticError(w, XtTest, yTest, pass + (i + 1)*1.0 / maxIter, telapsed, fp);
 			epochCounter = (epochCounter + 1) % PRINT_FREQ;
 			if (telapsed >= maxRunTime) {

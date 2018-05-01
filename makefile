@@ -23,4 +23,4 @@ SIG_logistic.o:SIG_logistic.cpp include/SIG.h
 SVRG_logistic.o:SVRG_logistic.cpp include/SVRG.h
 	g++ -c SVRG_logistic.cpp
 clean:
-	rm *.o 
+	rm *.o output

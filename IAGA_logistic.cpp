@@ -18,7 +18,27 @@ IAGA_logistic(w,Xt,y,lambda,eta,d,g);
 % maxRunTime
 % filename - saving results
 */
-
+void IAGA_init(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest, double &lambda, double &eta, double &a, double &b, double &gamma,\
+    int &maxIter, int &batchSize, int &passes, int &maxRunTime, string &filename){
+    cout << "Input batchSize: " << endl;
+    cin >> batchSize;
+    filename = "IAG_output_"+to_string(batchSize);
+    fp = fopen(filename.c_str(), "a");
+    if (fp == NULL) {
+        cout << "Cannot write results to file: " << filename << endl;
+    }
+    LogisticError(w, XtTest, yTest, 0, 0, fp);
+    epochCounter = (epochCounter + 1) % PRINT_FREQ;
+    lambda = 1/Xt.cols();
+    eta = 0.1;
+    a = batchSize>=2?4:1e-1;
+    b = 0;
+    gamma = 0;
+    maxIter = 2*Xt.cols();
+    passes = 10;
+    maxRunTime = 60;
+    return;
+}
 void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, \
      VectorXd &yTest, VectorXd &d, VectorXd &g, string filename, double lambda, double eta, \
     int maxIter, int batchSize, int pass, double a, double b, int gamma, int maxRunTime) {
@@ -33,7 +53,6 @@ void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd 
     if (fp == NULL) {
         cout << "Cannot write results to file: " << filename << endl;
     }
-    epochCounter = 0;
     LogisticError(w, XtTest, yTest, 0, 0, fp);
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
 
@@ -82,6 +101,7 @@ void IAGA_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd 
 int IAGA_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, const VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime){
     long i, idx, j;
     double innerProd=0, tmpDelta, eta;
+
     for (i = 0; i < maxIter; i++) {
         eta = a * pow(b + i + 1, -gamma);
         Noise noise(0.0,sqrt(eta*2/nSamples));
@@ -119,6 +139,7 @@ int IAGA_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, const Vect
     int* sampleBuffer = new int[batchSize];
     
     Noise noise(0.0, sqrt(eta * 2 / nSamples));
+
     for (i = 0; i < maxIter;i++) {
         eta = a * pow(b + i + 1, -gamma);
         for (k = 0; k < batchSize; k++) {

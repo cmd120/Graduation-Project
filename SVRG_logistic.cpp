@@ -19,7 +19,27 @@ SVRG_logistic(w,Xt,y,lambda,eta,wtilde,G);
 % maxRunTime
 % filename - saving results
 */
-
+void SVRG_init(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest, double &lambda, double &eta, double &a, double &b, double &gamma,\
+    int &maxIter, int &batchSize, int &passes, int &maxRunTime, string &filename){
+    cout << "Input batchSize: " << endl;
+    cin >> batchSize;
+    filename = "IAG_output_"+to_string(batchSize);
+    fp = fopen(filename.c_str(), "a");
+    if (fp == NULL) {
+        cout << "Cannot write results to file: " << filename << endl;
+    }
+    LogisticError(w, XtTest, yTest, 0, 0, fp);
+    epochCounter = (epochCounter + 1) % PRINT_FREQ;
+    lambda = 1/Xt.cols();
+    eta = 0.1;
+    a = batchSize>=2?4:1e-1;
+    b = 0;
+    gamma = 0;
+    maxIter = 2*Xt.cols();
+    passes = 10;
+    maxRunTime = 60;
+    return;
+}
 // void SVRG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \
 //      VectorXd &yTest, VectorXd wtilde, VectorXd G, string filename, double lambda, double eta, \
 //     int maxIter, int batchSize, int pass, double a, double b, double gamma,  int maxRunTime) {
