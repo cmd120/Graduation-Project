@@ -1,6 +1,5 @@
 #include "include/SparseMat.h"
 
-int SPARSE = 0;
 // template <typename T>
 // void buildProblem(vector<T> &coefficients, int rows, int cols, )
 
@@ -26,6 +25,17 @@ void InitOuterStarts(const SparseMatrix<double> &mat, int* outerStarts){
 	for(int i=0;i<count+1;++i){
 		cout << outerStarts[i] <<endl;
 	}
+}
+
+int IsSparse(vector<double> &mat){
+	int ret;
+	long count = 0;
+	cout << "mat size: " << mat.size() << endl;
+	for(long i=0;i < mat.size(); ++i){
+		count = (mat[i] - 0)  < ACCURACY ? count : count + 1;
+	}
+	ret = count >= mat.size()/2 ? 0 : 1;
+	return ret;
 }
 
 // //ir is counterpart of mat.innerIndexPtr() in matlab

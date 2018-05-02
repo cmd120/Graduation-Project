@@ -52,10 +52,7 @@ vector<BYTE> read_mnist_images(string full_path) {
 // BYTE* read_mnist_labels(string full_path, int& number_of_labels) {
 vector<BYTE> read_mnist_labels(string full_path) {
     int number_of_labels;
-
-
     ifstream file(full_path, ios::binary);
-
     if(file.is_open()) {
         int magic_number = 0;
         file.read((char *)&magic_number, sizeof(magic_number));
@@ -77,6 +74,51 @@ vector<BYTE> read_mnist_labels(string full_path) {
     }
 }
 
+void mnist_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest, VectorXd &yTest){
+    string train_image_path = "train-images";
+    string train_label_path = "train-labels";
+    string test_image_path = "test-images";
+    string test_label_path = "test-labels";
+    vector<BYTE> train_image_dataset = read_mnist_images(train_image_path);
+    vector<BYTE> train_label_dataset = read_mnist_labels(train_label_path);
+    vector<BYTE> test_image_dataset = read_mnist_images(test_image_path);
+    vector<BYTE> test_label_dataset = read_mnist_labels(test_label_path);
+    
+    vector<double> Xt_train(train_image_dataset.begin(),train_image_dataset.end());
+    vector<double> y_train(train_label_dataset.begin(),train_label_dataset.end());
+    vector<double> Xt_test(test_image_dataset.begin(),test_image_dataset.end());
+    vector<double> y_test(test_label_dataset.begin(),test_label_dataset.end());  
+    //classification
+    vector<double> Xt_train_classify,y_train_classify,Xt_test_classify,y_test_classify;
+    for(int i=0;i<y_train.size();++i){
+        if(y_train[i]<=1){
+            Xt_train_classify.insert(Xt_train_classify.end(),Xt_train.begin()+i*784,Xt_train.begin()+(i+1)*784);
+            y_train_classify.push_back(y_train[i]);
+        }
+    }
+    for(int i=0;i<y_test.size();++i){
+        if(y_test[i]<=1){
+            Xt_test_classify.insert(Xt_test_classify.end(),Xt_test.begin()+i*784,Xt_test.begin()+(i+1)*784);
+            y_test_classify.push_back(y_test[i]);
+        }
+    }
+    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> Xtt(Xt_train_classify.data(), 784, Xt_train_classify.size()/784);
+    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> yy(y_train_classify.data(), y_train_classify.size(), 1);
+    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> XttTest(Xt_test_classify.data(), 784, Xt_test_classify.size()/784);
+    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> yyTest(y_test_classify.data(), y_test_classify.size(), 1);
+    //normalization
+    for(int i=0;i<Xtt.cols();++i){
+        Xtt.col(i) = Xtt.col(i)/Xtt.col(i).norm();
+    }
+    for(int i=0;i<XttTest.cols();++i){
+        XttTest.col(i) = XttTest.col(i)/XttTest.col(i).norm();
+    }
+    cout << "Xt rows: " << Xtt.rows() << endl << "Xt cols: " << Xtt.cols() << endl;
+    cout << "XtTest rows: " << XttTest.rows() << endl << "XtTest cols: " << XttTest.cols() << endl;
+    cout << "y cols: " << yy.size() << endl;
+    cout << "yTest cols: " << yyTest.size() << endl;
+    Xt = Xtt; y = yy; XtTest = XttTest; yTest = yyTest;
+}
 
 
 

@@ -8,7 +8,7 @@
 #define ACCURACY 10E-5
 
 #include <chrono>
-#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <cmath>
 #include <string>

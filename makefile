@@ -1,9 +1,21 @@
-run: entrance.o MNIST_Read.o DenseMat.o LogisticError.o LogisticGradient.o IAG_logistic.o IAGA_logistic.o SAG_logistic.o SAGA_logistic.o SGD_logistic.o SIG_logistic.o SVRG_logistic.o
-	g++ -o run entrance.o MNIST_Read.o DenseMat.o LogisticError.o LogisticGradient.o IAG_logistic.o IAGA_logistic.o SAG_logistic.o SAGA_logistic.o SGD_logistic.o SIG_logistic.o SVRG_logistic.o
-entrance.o:entrance.cpp include/comm.h include/MNIST_Read.h include/IAG.h include/IAGA.h include/SAG.h include/SAGA.h include/SGD.h include/SIG.h include/SVRG.h
+objects = entrance.o MNIST_Read.o covtype_read.o DenseMat.o \
+			SparseMat.o LogisticError.o LogisticGradient.o IAG_logistic.o \
+			IAGA_logistic.o SAG_logistic.o SAGA_logistic.o SGD_logistic.o \
+			SIG_logistic.o SVRG_logistic.o
+headers = include/comm.h include/MNIST_Read.h include/covtype.h include/IAG.h \
+		 	include/IAGA.h include/SAG.h include/SAGA.h include/SGD.h \
+		 	include/SIG.h include/SVRG.h include/DenseMat.h include/SparseMat.h
+
+run: $(objects)
+	g++ -o run $(objects)
+entrance.o:entrance.cpp $(headers)
 	g++ -c entrance.cpp
 DenseMat.o:DenseMat.cpp include/DenseMat.h
 	g++ -c DenseMat.cpp
+SparseMat.o:SparseMat.cpp include/SparseMat.h
+	g++ -c SparseMat.cpp
+covtype_read.o:covtype_read.cpp include/covtype.h
+	g++ -c covtype_read.cpp
 MNIST_Read.o:MNIST_Read.cpp include/MNIST_Read.h
 	g++ -c MNIST_Read.cpp
 LogisticError.o:LogisticError.cpp include/LogisticError.h
@@ -25,4 +37,4 @@ SIG_logistic.o:SIG_logistic.cpp include/SIG.h
 SVRG_logistic.o:SVRG_logistic.cpp include/SVRG.h
 	g++ -c SVRG_logistic.cpp
 clean:
-	rm *.o output
+	rm run $(objects)

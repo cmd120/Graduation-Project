@@ -1,4 +1,5 @@
 #include "include/MNIST_Read.h"
+#include "include/covtype.h"
 #include "include/IAG.h"
 #include "include/IAGA.h"
 #include "include/SAG.h"
@@ -14,7 +15,6 @@ std::chrono::high_resolution_clock::time_point startTime;
 int SPARSE;
 
 int LogisticEntrance(int algorithmType){
-	int i;
 	MatrixXd Xt,XtTest;
 	VectorXd y,yTest;
     VectorXd w,sumIG(Xt.rows()),gradients(Xt.cols()), wtilde,G;
@@ -27,63 +27,24 @@ int LogisticEntrance(int algorithmType){
 		return 1;
 	}
 	cout << "Your choice of algorithm: " << algorithmType << endl;
-	cout << "Available datasets: " << endl << "1. MNIST" << endl;
+	cout << "Available datasets: " << endl << "1. MNIST " << "2. COVTYPE"<< endl;
+	int datasetNum;
+	cin >> datasetNum;
+	cout << "Your choice of dataset: " << datasetNum << endl;;
 	//default dataset is MNIST
-	int dataset = 1;
+	
 	//MNIST dataset
-	if(dataset==1){
-	    string train_image_path = "train-images";
-	    string train_label_path = "train-labels";
-	    string test_image_path = "test-images";
-	    string test_label_path = "test-labels";
-	    vector<BYTE> train_image_dataset = read_mnist_images(train_image_path);
-	    vector<BYTE> train_label_dataset = read_mnist_labels(train_label_path);
-	 	vector<BYTE> test_image_dataset = read_mnist_images(test_image_path);
-	    vector<BYTE> test_label_dataset = read_mnist_labels(test_label_path);
-	    
-	    vector<double> Xt_train(train_image_dataset.begin(),train_image_dataset.end());
-	    vector<double> y_train(train_label_dataset.begin(),train_label_dataset.end());
-	    vector<double> Xt_test(test_image_dataset.begin(),test_image_dataset.end());
-	    vector<double> y_test(test_label_dataset.begin(),test_label_dataset.end());  
-	    //classification
-	    vector<double> Xt_train_classify,y_train_classify,Xt_test_classify,y_test_classify;
-	    for(i=0;i<y_train.size();++i){
-	    	if(y_train[i]<=1){
-	    		Xt_train_classify.insert(Xt_train_classify.end(),Xt_train.begin()+i*784,Xt_train.begin()+(i+1)*784);
-	    		y_train_classify.push_back(y_train[i]);
-	    	}
-	    }
-	    for(i=0;i<y_test.size();++i){
-	    	if(y_test[i]<=1){
-	    		Xt_test_classify.insert(Xt_test_classify.end(),Xt_test.begin()+i*784,Xt_test.begin()+(i+1)*784);
-	    		y_test_classify.push_back(y_test[i]);
-	    	}
-	    }
-	    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> Xtt(Xt_train_classify.data(), 784, Xt_train_classify.size()/784);
-	    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> yy(y_train_classify.data(), y_train_classify.size(), 1);
-	    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> XttTest(Xt_test_classify.data(), 784, Xt_test_classify.size()/784);
-	    Map<Matrix<double,Dynamic,Dynamic,ColMajor>> yyTest(y_test_classify.data(), y_test_classify.size(), 1);
-		//normalization
-	    for(i=0;i<Xtt.cols();++i){
-	    	Xtt.col(i) = Xtt.col(i)/Xtt.col(i).norm();
-	    }
-	    for(i=0;i<XttTest.cols();++i){
-	    	XttTest.col(i) = XttTest.col(i)/XttTest.col(i).norm();
-	    }
-	    // VectorXd yy = y;
-	    // VectorXd yyTest = yTest;
-	    w = MatrixXd::Zero(Xtt.rows(),1);
-	    wtilde = w;
-	    G = w;
-	    gradients = (1+(-Xtt.adjoint()*w).array().exp()).inverse() - yy.array();
-	    sumIG = Xtt*gradients;
-	    //DEBUG
-	    cout << "Xt rows: " << Xtt.rows() << endl << "Xt cols: " << Xtt.cols() << endl;
-	    cout << "XtTest rows: " << XttTest.rows() << endl << "XtTest cols: " << XttTest.cols() << endl;
-	    cout << "y cols: " << yy.size() << endl;
-	    cout << "yTest cols: " << yyTest.size() << endl;
-	    Xt = Xtt; y = yy; XtTest = XttTest; yTest = yyTest;
+	switch(datasetNum){
+		case 1:
+			mnist_read(Xt, y, XtTest, yTest);break;
+		case 2:
+			covtype_read(Xt, y, XtTest, yTest);break;
 	}
+    w = MatrixXd::Zero(Xt.rows(),1);
+    wtilde = w;
+    G = w;
+    gradients = (1+(-Xt.adjoint()*w).array().exp()).inverse() - y.array();
+    sumIG = Xt*gradients;
     string filename;
     int nVars, nSamples, flag;
     epochCounter = 0;

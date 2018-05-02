@@ -5,7 +5,6 @@
 #include <iterator>
 
 #include "comm.h"
-#include "SparseMat.h"
 
 using namespace std;
 
@@ -19,4 +18,6 @@ auto reverseInt = [](int i) {
 
 vector<BYTE> read_mnist_images(string full_path);
 vector<BYTE> read_mnist_labels(string full_path);
+void mnist_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest, VectorXd &yTest);
+
 #endif
