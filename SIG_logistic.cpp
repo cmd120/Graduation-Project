@@ -89,12 +89,10 @@ int SIG_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &
             innerProdI += w(j)*Xt.col(idx)(j);
             innerProdZ += wtilde(j) * Xt.col(idx)(j);
         }
-
         tmpDelta = LogisticPartialGradient(innerProdI, 0) - LogisticPartialGradient(innerProdZ, 0);
         w = -eta*G+(1-eta*lambda)*w;
         w = NOISY?w.array()+noise.gen():w;
         w = w + (-eta) * tmpDelta * Xt.col(idx);
-
         //compute error
         if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
             endTime = Clock::now();

@@ -80,12 +80,14 @@ int SAG_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd y
 {
     long i, idx, j;
     double innerProd = 0 , tmpDelta, eta, telapsed;
-    Noise idxSample(0,nSamples-1);
     auto endTime = Clock::now();
+    Noise idxSample(0,nSamples-1);
+    // cout << "distribution type: " << idxSample.get_type() << endl;
     for (i = 0; i < maxIter; i++) {
         eta = a * pow(b + i + 1, -gamma);
         Noise noise(0.0, sqrt(eta * 2 / nSamples));
         idx = idxSample.gen();
+        // cout << "idx: " << idx << endl;
         innerProd = Xt.col(idx).dot(w);
         tmpDelta = LogisticPartialGradient(innerProd, y(idx));
         w = -eta/nSamples*d+(1-eta*lambda)*w;

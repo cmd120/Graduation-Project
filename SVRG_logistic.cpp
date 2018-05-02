@@ -85,17 +85,14 @@ int SVRG_LogisticInnerLoopSingleDense(VectorXd &w,const MatrixXd &Xt, VectorXd &
         eta = a * pow(b + pass*1.0*maxIter +i + 1, -gamma);
         Noise noise(0.0, sqrt(eta * 2 / nSamples));
         idx = idxSample.gen();
-        for(j=0;j<nVars;++i){
+        for(j=0;j<nVars;++j){
             innerProdI += w(j) * Xt.col(idx)(j);
             innerProdZ += wtilde[j] * Xt.col(idx)(j);
         }
-
         tmpDelta = LogisticPartialGradient(innerProdI,0)-LogisticPartialGradient(innerProdZ,0);
-        
         w = -eta*G+(1-eta*lambda)*w;
         w = NOISY?w.array()+noise.gen():w;
         w = w + (-eta) * tmpDelta * Xt.col(idx);
-
         //compute error
         if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
             endTime = Clock::now();
@@ -117,7 +114,6 @@ int SVRG_LogisticInnerLoopBatchDense(VectorXd &w, const MatrixXd &Xt, VectorXd &
     auto endTime = Clock::now();
     VectorXd gradBuffer(batchSize);
     int* sampleBuffer = new int[batchSize];
-
     Noise idxSample(0, nSamples-1);
     for (i = 0; i < maxIter;i++) {
         eta = a * pow(b + pass*1.0*maxIter + i + 1, -gamma);

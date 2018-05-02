@@ -30,11 +30,11 @@ void LogisticError(const VectorXd &w, const MatrixXd &Xt, const VectorXd &y, dou
         if(tmp<=0 || tmp>=1){
             cout << "tmp: " << tmp << endl;
             cout << "problem tmpRes(i): " << tmpRes(i) << endl;
+            debugInfo =  y(i) * log(tmp) + (1 - y(i)) * log(1 - tmp);
+            // cout << debugInfo << endl;
             return; 
         }
         // cout << "tmp" << tmp << endl;
-        debugInfo =  y(i) * log(tmp) + (1 - y(i)) * log(1 - tmp);
-        // cout << debugInfo << endl;
         sumError += y(i) * log(tmp) + (1 - y(i)) * log(1 - tmp);
     }
     // cout << "LogisticError point2" << endl;

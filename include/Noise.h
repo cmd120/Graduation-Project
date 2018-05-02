@@ -22,6 +22,9 @@ public:
 	{
 		this->distribution_type = UNIFORM;
 	}
+	types get_type(){
+		return this->distribution_type;
+	}
 	double gen() 
 	{
 		return this->distribution_type == NORMAL ? this->normalDist(this->sed) : this->uniformDist(this->sed);

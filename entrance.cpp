@@ -17,7 +17,7 @@ int LogisticEntrance(int algorithmType){
 	int i;
 	MatrixXd Xt,XtTest;
 	VectorXd y,yTest;
-    VectorXd w,sumIG(Xt.rows()),gradients(Xt.cols());
+    VectorXd w,sumIG(Xt.rows()),gradients(Xt.cols()), wtilde,G;
     double lambda , eta, a, b, gamma;
 	int maxIter, batchSize, passes, maxRunTime;
 	SPARSE = 0;
@@ -72,7 +72,9 @@ int LogisticEntrance(int algorithmType){
 	    }
 	    // VectorXd yy = y;
 	    // VectorXd yyTest = yTest;
-	    w = VectorXd(MatrixXd::Zero(Xtt.rows(),1));
+	    w = MatrixXd::Zero(Xtt.rows(),1);
+	    wtilde = w;
+	    G = w;
 	    gradients = (1+(-Xtt.adjoint()*w).array().exp()).inverse() - yy.array();
 	    sumIG = Xtt*gradients;
 	    //DEBUG
@@ -132,16 +134,18 @@ int LogisticEntrance(int algorithmType){
 	    	case 6:
 	    		SIG_init(Xt, w, XtTest, yTest, lambda, eta, a, b, gamma, maxIter, batchSize, passes, maxRunTime, filename);
 	    		for(int pass=0;pass<passes;++pass){
-		    		if(batchSize>=2?SIG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize):\
-		    					SIG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime)
+	    			LogisticGradient(wtilde, G, Xt, y);
+		    		if(batchSize>=2?SIG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize):\
+		    					SIG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime)
 	    			)break;
 	    		}
 	    		break;
 	    	case 7:
 	    		SVRG_init(Xt, w, XtTest, yTest, lambda, eta, a, b, gamma, maxIter, batchSize, passes, maxRunTime, filename);
 	    		for(int pass=0;pass<passes;++pass){
-		    		if(batchSize>=2?SVRG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize):\
-		    					SVRG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime)
+	    			LogisticGradient(wtilde, G, Xt, y);
+		    		if(batchSize>=2?SVRG_LogisticInnerLoopBatchDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize):\
+		    					SVRG_LogisticInnerLoopSingleDense(w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime)
 					)break;
 				}
 				break;
@@ -158,7 +162,7 @@ int LogisticEntrance(int algorithmType){
 int main(int argc, char* argv[]){
 	int algorithmType, dataset=1;
 	while(1){
-		cout << "Available algorithms:" << endl << "1. IAG  " << "2. IAGA" << endl << "3. SAG  " << "4. SAGA" << endl << "5. SGD  " << "6. SID" << endl << "7. SVRG " << "0. Quit" << endl;
+		cout << "Available algorithms:" << endl << "1. IAG  " << "2. IAGA" << endl << "3. SAG  " << "4. SAGA" << endl << "5. SGD  " << "6. SIG" << endl << "7. SVRG " << "0. Quit" << endl;
 		cout << "Enter your choice of algorithm: " << endl;
 		if(cin >> algorithmType){
 			if(LogisticEntrance(algorithmType))break;
