@@ -86,8 +86,8 @@ int SVRG_LogisticInnerLoopSingleDense(VectorXd &w,const MatrixXd &Xt, VectorXd &
         Noise noise(0.0, sqrt(eta * 2 / nSamples));
         idx = idxSample.gen();
         for(j=0;j<nVars;++j){
-            innerProdI += w(j) * Xt.col(idx)(j);
-            innerProdZ += wtilde[j] * Xt.col(idx)(j);
+            innerProdI += w(j) * Xt(j,idx);
+            innerProdZ += wtilde[j] * Xt(j,idx);
         }
         tmpDelta = LogisticPartialGradient(innerProdI,0)-LogisticPartialGradient(innerProdZ,0);
         w = -eta*G+(1-eta*lambda)*w;

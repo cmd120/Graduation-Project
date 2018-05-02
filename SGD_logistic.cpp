@@ -85,7 +85,7 @@ int SGD_LogisticInnerLoopSingleDense(VectorXd &w, const MatrixXd &Xt, VectorXd &
         Noise noise(0.0, sqrt(eta * 2 / nSamples));
         idx = idxSample.gen();
         for(j=0;j<nVars;++j){
-            innerProd += w(j)*(Xt.col(idx)(j));
+            innerProd += w(j)*Xt(j,idx);
         }
         tmpDelta = LogisticPartialGradient(innerProd, y(idx));
         w = -eta*tmpDelta*Xt.col(idx)+(1-eta*lambda)*w;
