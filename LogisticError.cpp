@@ -11,7 +11,9 @@ void LogisticError(const VectorXd &w, const MatrixXd &Xt, const VectorXd &y, dou
     VectorXd tmpRes(nSamples);
     // sigmoid = 1./(1 + exp(-(X'*w)));
     // loglikelihood = mean(y.*log(sigmoid) + (1 - y).*log(1 - sigmoid));
+    cout << "sum of w:" << w.sum() << endl;
     tmpRes = Xt.adjoint()*w;
+
     // cout << "tmpRes pass" << endl;
     // cout << "y size: " << y.size() << endl;
     // cout << "tmpRes size" << tmpRes.size() <<endl;
@@ -23,7 +25,15 @@ void LogisticError(const VectorXd &w, const MatrixXd &Xt, const VectorXd &y, dou
     // cout << tmpRes << endl;
     for(i = 0; i < nSamples; i++)
     {
+        double debugInfo;
         tmp = 1.0/(1 + exp(-tmpRes(i)));
+        if(tmp<=0 || tmp>=1){
+            cout << "tmp: " << tmp << endl;
+            cout << "problem tmpRes(i): " << tmpRes(i) << endl;
+            debugInfo =  y(i) * log(tmp) + (1 - y(i)) * log(1 - tmp);
+            // cout << debugInfo << endl;
+            return; 
+        }
         // cout << "tmp" << tmp << endl;
         sumError += y(i) * log(tmp) + (1 - y(i)) * log(1 - tmp);
     }

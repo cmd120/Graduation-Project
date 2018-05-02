@@ -1,6 +1,12 @@
 #ifndef COMM_H
 #define COMM_H
 
+#define NOISY 0  // 0 for optimization, 1 for bayes model
+#define PRINT_FREQ 50 // print test error 50 times per epoch
+#define BILLION  1E9
+#define FILE_NAME_LENGTH 64
+#define ACCURACY 10E-5
+
 #include <chrono>
 #include <cstdio>
 #include <iostream>
@@ -11,14 +17,16 @@
 #include "Eigen/Sparse"
 #include "Eigen/Dense"
 #include "Noise.h"
+#include "LogisticError.h"
+#include "LogisticGradient.h"
 
 
-#define NOISY 0  // 0 for optimization, 1 for bayes model
-#define PRINT_FREQ 50 // print test error 50 times per epoch
-#define BILLION  1E9
-#define FILE_NAME_LENGTH 64
-#define ACCURACY 10E-5
 
+
+extern int epochCounter;
+extern FILE *fp;
+extern std::chrono::high_resolution_clock::time_point startTime;
+extern int SPARSE;
 //Windows timer resolution
 #if defined(_WIN32) || defined(_WIN64)
 using Clock = std::chrono::high_resolution_clock;
@@ -27,6 +35,7 @@ using Clock = std::chrono::high_resolution_clock;
 #if defined(__linux__) || defined(__unix) || defined(__unix__)
 // temporary
 using Clock = std::chrono::high_resolution_clock;
+//when extern variables placed here, endif seems not match to the previous unmatched one but closest one??
 #endif
 // void LogisticGradient(double *w, const mxArray *XtArray, double *y, double *G);
 
