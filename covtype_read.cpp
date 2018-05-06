@@ -20,6 +20,7 @@ void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest, VectorXd &yTest){
 		// throw runtime_error("Cannot open file `" + full_path + "`!");
 		;
 	}
+	// SPARSE = issparse(fulldata);
 	for(int i=0;i<fulldata.size()/55;++i){
 		covtype_dataset.insert(covtype_dataset.end(),fulldata.begin()+i*55,fulldata.begin()+i*55+54);
 		covtype_labels.push_back(fulldata[i*55+54]);

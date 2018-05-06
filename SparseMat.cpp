@@ -27,7 +27,7 @@ void InitOuterStarts(const SparseMatrix<double> &mat, int* outerStarts){
 	}
 }
 
-int IsSparse(vector<double> &mat){
+int issparse(vector<double> &mat){
 	int ret;
 	long count = 0;
 	cout << "mat size: " << mat.size() << endl;

@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Eigen;
 
-int IsSparse(vector<double> &mat);
+int issparse(vector<double> &mat);
 void InitOuterStarts(const SparseMatrix<double> &mat, int *outerStarts);
 
 #endif
