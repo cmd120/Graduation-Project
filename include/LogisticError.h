@@ -8,6 +8,8 @@ using namespace Eigen;
 
 void LogisticError(const VectorXd &w, const MatrixXd &Xt, const VectorXd &y, double epoch, double telapsed, FILE *fp);
 
+void LogisticError(const VectorXd &w, const SparseMatrix<double> &Xt, const VectorXd &y, double epoch, double telapsed, FILE *fp);
+
 //Sparse Matrix
 // void LogisticError(const VectorXd &w, const SparseMatrix<double> &Xt, VectorXd &y, double epoch, double telapsed, FILE *fp)
 // {
