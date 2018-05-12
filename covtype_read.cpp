@@ -5,6 +5,7 @@ void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest, VectorXd &yTest){
 	string line, num;
 	string full_path = "covtype.data";
 	vector<double> fulldata, covtype_dataset, covtype_labels;
+	fulldata.reserve(40000000);
 	file.open(full_path);
 	if(file.is_open()){
 		while(getline(file,line)){

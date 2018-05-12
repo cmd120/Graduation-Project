@@ -27,25 +27,18 @@ int LogisticEntrance(int algorithmType, int datasetNum, SparseMatrix<double> &Xt
 		cout << "run out of space!" << endl;
 	}
 	InitOuterStarts(XtS,outerStarts);
-	cout << "1 pass" << endl;
 	w = MatrixXd::Zero(XtS.rows(),1);
-	cout << "2 pass" << endl;
     wtilde = w;
-    cout << "wtilde size: " << wtilde.size() << endl;
     G = w;
-    cout << "G size: "<< G.size() << endl;
     gradients = (1+(-XtS.adjoint()*w).array().exp()).inverse() - y.array();
-    cout << "3 pass" << endl;
     sumIG = XtS*gradients;
     epochCounter = 0;
-    cout << "4 pass" << endl;
     nVars = XtS.rows();
     nSamples = XtS.cols();
-    cout << "init pass" << endl;
     switch(algorithmType){
     	case 1:
 			IAG_init(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter, batchSize, passes, maxRunTime, filename, datasetNum);
-			for(int pass;pass<passes;++pass){
+			for(int pass=0;pass<passes;++pass){
 				if(batchSize>=2?IAG_LogisticInnerLoopBatch(w,XtS,y,innerIndices,outerStarts,XtTestS,yTest,lambda,sumIG,gradients,maxIter,nSamples,nVars,pass,a,b,gamma,maxRunTime,batchSize):\
 							IAG_LogisticInnerLoopSingle(w,XtS,y,innerIndices,outerStarts,XtTestS,yTest,lambda,sumIG,gradients,maxIter,nSamples,nVars,pass,a,b,gamma,maxRunTime)
 				)break;

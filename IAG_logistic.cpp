@@ -41,21 +41,6 @@ void IAG_init(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest, doub
 			passes = 30;
 			maxRunTime = 100;
 			break;
-		case 2:
-			;
-		case 3:
-			cout << "enter IAG case 3" <<endl;
-			VectorXd tmp = Xt.col(0);
-			double L = tmp.array().square().sum()/4 + lambda;
-			lambda = 1/Xt.cols();
-			eta = 0.1;
-			a = 1e-5/L;
-			b = 0;
-			maxIter = 2*Xt.cols();
-			passes = 6e4;
-			maxRunTime = 100;
-			break;
-
 	}
 	return;
 }
@@ -76,17 +61,23 @@ void IAG_init(SparseMatrix<double> &Xt, VectorXd &w, SparseMatrix<double> &XtTes
 	double L = tmp.array().square().sum()/4 + lambda;
 	lambda = 1/Xt.cols();
 	eta = 0.1;
-	a = 1e-5/L;
+	//DEBUG
+	a = 1e-8;
 	b = 0;
 	maxIter = 2*Xt.cols();
-	passes = 6e4;
+	passes = 6e2;
 	maxRunTime = 100;
+	if(DEBUG){
+		cout << "enter step length:" << endl;
+		cin >> a;
+		cout << "enter passes:" << endl;
+		cin >> passes;
+	}
 	return;
 }
 
 int IAG_LogisticInnerLoopSingle(VectorXd &w, const MatrixXd &Xt, VectorXd &y, const MatrixXd &XtTest, VectorXd &yTest, VectorXd &d, VectorXd &g, double lambda, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
 {
-	// cout << "enter IAG_LogisticInnerLoopSingleDense" << endl;
 	long i, idx, j;
 	double innerProd = 0 , tmpDelta, eta, telapsed;
 	auto endTime = Clock::now();
@@ -163,7 +154,12 @@ int IAG_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt, VectorXd &y, con
 	return 0;
 }
 
-int IAG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt, VectorXd &y, int *innerIndices, int *outerStarts, SparseMatrix<double> &XtTest, VectorXd &yTest, double lambda, VectorXd &d, VectorXd &g, long maxIter, int nSamples, int nVars, int pass, double a, double b, double gamma, int maxRunTime)
+int IAG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt, VectorXd &y, \
+								int *innerIndices, int *outerStarts, \
+								SparseMatrix<double> &XtTest, VectorXd &yTest, \
+								double lambda, VectorXd &d, VectorXd &g, \
+								long maxIter, int nSamples, int nVars, int pass, \
+								double a, double b, double gamma, int maxRunTime)
 {
 	long i, j, idx;
 	double innerProd, tmpGrad, tmpFactor, eta, telapsed;

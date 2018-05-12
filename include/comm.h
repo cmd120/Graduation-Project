@@ -1,6 +1,7 @@
 #ifndef COMM_H
 #define COMM_H
 
+#define DEBUG 1
 #define NOISY 0  // 0 for optimization, 1 for bayes model
 #define PRINT_FREQ 50 // print test error 50 times per epoch
 #define BILLION  1E9
