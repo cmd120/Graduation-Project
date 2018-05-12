@@ -45,7 +45,8 @@ void IAG_init(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest, doub
 			;
 		case 3:
 			cout << "enter IAG case 3" <<endl;
-			double L = Xt.col(0).array().square().sum()/4 + lambda;
+			VectorXd tmp = Xt.col(0);
+			double L = tmp.array().square().sum()/4 + lambda;
 			lambda = 1/Xt.cols();
 			eta = 0.1;
 			a = 1e-5/L;
@@ -71,7 +72,8 @@ void IAG_init(SparseMatrix<double> &Xt, VectorXd &w, SparseMatrix<double> &XtTes
     LogisticError(w, XtTest, yTest, 0, 0, fp);
     cout << "pass LogisticError" << endl;
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
-	double L = Xt.col(0).array().square().sum()/4 + lambda;
+    VectorXd tmp = Xt.col(0);
+	double L = tmp.array().square().sum()/4 + lambda;
 	lambda = 1/Xt.cols();
 	eta = 0.1;
 	a = 1e-5/L;

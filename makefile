@@ -8,6 +8,7 @@ headers = include/comm.h include/MNIST_Read.h include/covtype.h include/IAG.h \
 
 run: $(objects)
 	g++ -std=c++11 -o run $(objects)
+	#g++ -std=c++11 -o run $(objects)  ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -liomp5 -lpthread -lm -ldl	
 entrance.o:entrance.cpp $(headers)
 	g++ -std=c++11 -c entrance.cpp
 DenseMat.o:DenseMat.cpp include/DenseMat.h

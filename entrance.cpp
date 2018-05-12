@@ -8,8 +8,6 @@
 #include "include/SIG.h"
 #include "include/SVRG.h"
 
-const int trainSetSize = 2000;
-const int testSetSize = 100;
 int epochCounter;
 FILE *fp;
 std::chrono::high_resolution_clock::time_point startTime;
@@ -19,10 +17,6 @@ int LogisticEntrance(int algorithmType, int datasetNum, SparseMatrix<double> &Xt
     double lambda , eta, a, b, gamma;
 	int maxIter, batchSize, passes, maxRunTime;
 	SPARSE = 0;
-	if(!algorithmType){
-		cout << "Bye." << endl;
-		return 1;
-	}
 	cout << "Your choice of algorithm: " << algorithmType << endl;
 	int nVars, nSamples, flag;
 	string filename;
@@ -34,8 +28,8 @@ int LogisticEntrance(int algorithmType, int datasetNum, SparseMatrix<double> &Xt
 	}
 	InitOuterStarts(XtS,outerStarts);
 	cout << "1 pass" << endl;
-	    w = MatrixXd::Zero(XtS.rows(),1);
-	    cout << "2 pass" << endl;
+	w = MatrixXd::Zero(XtS.rows(),1);
+	cout << "2 pass" << endl;
     wtilde = w;
     cout << "wtilde size: " << wtilde.size() << endl;
     G = w;
@@ -67,10 +61,6 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt, VectorXd &
     double lambda , eta, a, b, gamma;
 	int maxIter, batchSize, passes, maxRunTime;
 	SPARSE = 0;
-	if(!algorithmType){
-		cout << "Bye." << endl;
-		return 1;
-	}
 	cout << "Your choice of algorithm: " << algorithmType << endl;
 	int nVars, nSamples, flag;
 	string filename;
@@ -147,46 +137,74 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt, VectorXd &
 	return 0;
 }
 
+void datasetOption(int &datasetNum){
+	const int NUMBEROFDATASET = 2;
+	const string datasets[NUMBEROFDATASET] = {"MNIST","COVTYPE"};
+	cout << "Available datasets to choose from:" << endl;
+	for(int i =0;i<NUMBEROFDATASET;++i){
+		cout << i+1 << "." << datasets[i] << endl;
+	}
+	cout << "Enter your choice of dataset: " << endl;
+	cin >> datasetNum;
+	cout << "Your choice of dataset: " << datasets[datasetNum-1] << endl;
+	return;
+}
+void algorithmOption(int &algorithmType){
+	const int NUMBEROFAlGORITHM = 7;
+	const string algorithms[NUMBEROFAlGORITHM] = {"IAG","IAGA","SAG","SGGA","SGD","SIG","SVRG"};
+	for(int i =0;i<NUMBEROFAlGORITHM;++i){
+		cout << i+1 << "." << algorithms[i] << endl;
+	}
+	cout << "Enter your choice of algorithm: (0 to quit)" << endl;
+	while(1){
+		if(cin >> algorithmType){
+			if(algorithmType)
+				cout << "Your choice of algorithm: " << algorithms[algorithmType-1] << endl;
+			else
+				cout << "Bye" << endl;
+			break;
+		}
+		else{
+			cout << "Invalid Input! Please intput a numerical value." << endl;
+			cin.clear();
+			while(cin.get()!='\n');
+		}
+	}
+	return;
+}
+
 int main(int argc, char* argv[]){
 	MatrixXd Xt,XtTest;
-	SparseMatrix<double> XtS(54,trainSetSize), XtTestS(54,testSetSize);
-	VectorXd y,yTest;
-	int algorithmType, dataset;
-	cout << "Available datasets: " << endl << "1. MNIST " << "2. COVTYPE"<< endl;
-	int datasetNum;
-	cin >> datasetNum;
-	cout << "Your choice of dataset: " << datasetNum << endl;
+	SparseMatrix<double> XtS, XtTestS;
+	VectorXd y, yTest;
+	int algorithmType, dataset, datasetNum;
+	
+	datasetOption(datasetNum);
 	switch(datasetNum){
 		case 1:
 			mnist_read(Xt, y, XtTest, yTest);
 			break;
 		case 2:
-			// covtype_read(Xt, y, XtTest, yTest);break;
-			covtype_binary_read(XtS,y,trainSetSize);
-			covtype_binary_read(XtTestS,yTest,testSetSize);
-			break;
-		case 3:
 			covtype_read(Xt, y, XtTest, yTest);
 	}
 	cout << "dataset loaded." << endl;
 	if(SPARSE){
+		XtS = Xt.sparseView();
+		XtTestS = XtTest.sparseView();
 		cout << "dataset is sparse" << endl;
 	}
 	else{
 		cout << "dataset is dense" <<endl;
 	}
 	while(1){
-		cout << "Available algorithms:" << endl << "1. IAG  " << "2. IAGA" << endl << "3. SAG  " << "4. SAGA" << endl << "5. SGD  " << "6. SIG" << endl << "7. SVRG " << "0. Quit" << endl;
-		cout << "Enter your choice of algorithm: " << endl;
-		if(cin >> algorithmType){
+		algorithmOption(algorithmType);
+		if(algorithmType){
 			int ret;
 			ret = SPARSE?LogisticEntrance(algorithmType,datasetNum,XtS,y,XtTestS,yTest):LogisticEntrance(algorithmType,datasetNum,Xt,y,XtTest,yTest);
 			if(ret)break;
 		}
 		else{
-			cout << "Invalid Input! Please intput a numerical value." << endl;
-			cin.clear();
-			while(cin.get()!='\n');
+			break;
 		}
 	}
 	return 0;

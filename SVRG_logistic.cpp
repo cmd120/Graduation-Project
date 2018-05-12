@@ -38,7 +38,7 @@ void SVRG_init(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest, dou
     gamma = 0;
     maxIter = 2*Xt.cols();
     passes = 10;
-    maxRunTime = 60;
+    maxRunTime = 150;
     return;
 }
 // void SVRG_logistic(VectorXd &w, const MatrixXd &Xt, VectorXd y, const MatrixXd &XtTest, \

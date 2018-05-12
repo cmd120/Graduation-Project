@@ -33,7 +33,7 @@ void SAG_init(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest, doub
     epochCounter = (epochCounter + 1) % PRINT_FREQ;
     lambda = 1/Xt.cols();
     eta = 0.1;
-    a = batchSize>=2?1:1e-1;
+    a = batchSize>=2?1:6e-3;
     b = 0;
     gamma = 0;
     maxIter = 2*Xt.cols();

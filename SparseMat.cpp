@@ -22,7 +22,7 @@ void InitOuterStarts(const SparseMatrix<double> &mat, int* outerStarts){
 			count++;
 		}
 	}
-	//DEBUG
+	// DEBUG
 	// for(int i=0;i<count+1;++i){
 	// 	cout << outerStarts[i] <<endl;
 	// }
@@ -32,7 +32,7 @@ void InitOuterStarts(const SparseMatrix<double> &mat, int* outerStarts){
 int issparse(vector<double> &mat){
 	int ret;
 	long count = 0;
-	cout << "mat size: " << mat.size() << endl;
+	// cout << "mat size: " << mat.size() << endl;
 	for(long i=0;i < mat.size(); ++i){
 		count = (mat[i] - 0)  < ACCURACY ? count : count + 1;
 	}

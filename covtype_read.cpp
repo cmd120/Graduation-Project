@@ -20,7 +20,7 @@ void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest, VectorXd &yTest){
 		// throw runtime_error("Cannot open file `" + full_path + "`!");
 		;
 	}
-	// SPARSE = issparse(fulldata);
+	SPARSE = issparse(fulldata);
 	for(int i=0;i<fulldata.size()/55;++i){
 		int label = fulldata[i*55+54];
 		//binary classification
@@ -31,14 +31,11 @@ void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest, VectorXd &yTest){
 	}
     Map<Matrix<double,Dynamic,Dynamic,ColMajor>> Xtt(covtype_dataset.data(), 54, covtype_dataset.size()/54);
     Map<Matrix<double,Dynamic,Dynamic,ColMajor>> yy(covtype_labels.data(), covtype_labels.size(), 1);
-	int train_cols(100000), test_cols(2000);
 	// cout << "Xtt[0]: " << Xtt.col(0) << endl;
-	Xt = Xtt.leftCols(train_cols), y = yy.topRows(train_cols), XtTest = Xtt.rightCols(test_cols), yTest = yy.bottomRows(test_cols);
+	Xt = Xtt.leftCols(trainSetSize), y = yy.topRows(trainSetSize), XtTest = Xtt.rightCols(testSetSize), yTest = yy.bottomRows(testSetSize);
 	for(int i=0;i<Xt.cols();++i){
 		Xt.col(i) /= Xt.col(i).norm();
 	}
-	cout << "Xt[0]: " << Xt.col(0) << endl;
-	cout << "Xt[0] norm: " << (Xt.col(0)).norm() << endl;
 	return;
 }
 

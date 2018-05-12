@@ -6,6 +6,7 @@
 #define BILLION  1E9
 #define FILE_NAME_LENGTH 64
 #define ACCURACY 10E-5
+//#define EIGEN_USE_MKL_ALL //if Intel MKL is installed
 
 #include <chrono>
 #include <cstdlib>
