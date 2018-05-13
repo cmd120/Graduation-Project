@@ -18,72 +18,6 @@ iterations
 % maxRunTime
 % filename - saving results
 */
-void IAG_init(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest,
-              double &lambda, double &eta, double &a, double &b, double &gamma,
-              int &maxIter, int &batchSize, int &passes, int &maxRunTime,
-              string &filename, int &datasetNum) {
-  startTime = Clock::now();
-  cout << "Input batchSize: " << endl;
-  cin >> batchSize;
-  filename = "IAG_output_dense_" + to_string(batchSize);
-  fp = fopen(filename.c_str(), "a");
-  if (fp == NULL) {
-    cout << "Cannot write results to file: " << filename << endl;
-  }
-  LogisticError(w, XtTest, yTest, 0, 0, fp);
-  epochCounter = (epochCounter + 1) % PRINT_FREQ;
-  switch (datasetNum) {
-    case 1:
-      double L = Xt.col(0).array().square().sum() / 4 + lambda;
-      double mu;
-      lambda = 1 / Xt.cols();
-      eta = 0.1;
-      a = batchSize >= 2 ? 1 : 1e-2;
-      b = 0;
-      gamma = 0;
-      maxIter = 2 * Xt.cols();
-      passes = 10;
-      maxRunTime = 60;
-      mu = lambda;
-      objFuncLR = LR(lambda, L, mu);
-      break;
-  }
-  return;
-}
-void IAG_init(SparseMatrix<double> &Xt, VectorXd &w,
-              SparseMatrix<double> &XtTest, VectorXd &yTest, double &lambda,
-              double &eta, double &a, double &b, double &gamma, int &maxIter,
-              int &batchSize, int &passes, int &maxRunTime, string &filename,
-              int &datasetNum) {
-  startTime = Clock::now();
-  cout << "Input batchSize: " << endl;
-  cin >> batchSize;
-  filename = "IAG_output_sparse_" + to_string(batchSize);
-  fp = fopen(filename.c_str(), "a");
-  if (fp == NULL) {
-    cout << "Cannot write results to file: " << filename << endl;
-  }
-  LogisticError(w, XtTest, yTest, 0, 0, fp);
-  epochCounter = (epochCounter + 1) % PRINT_FREQ;
-  VectorXd tmp = Xt.col(0);
-  double L = tmp.array().square().sum() / 4 + lambda;
-  lambda = 1 / Xt.cols();
-  eta = 0.1;
-  // DEBUG
-  a = 1e-8;
-  b = 0;
-  maxIter = 2 * Xt.cols();
-  passes = 6e2;
-  maxRunTime = 100;
-  if (DEBUG) {
-    cout << "enter step length:" << endl;
-    cin >> a;
-    cout << "enter passes:" << endl;
-    cin >> passes;
-  }
-  return;
-}
-
 int IAG_LogisticInnerLoopSingle(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
                                 const MatrixXd &XtTest, VectorXd &yTest,
                                 VectorXd &d, VectorXd &g, double lambda,
@@ -142,16 +76,12 @@ int IAG_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
       innerProd = Xt.col(idx).dot(w);
       gradBuffer(k) = LogisticPartialGradient(innerProd, y(idx));
     }
-
     w = -eta / nSamples * d + (1 - eta * lambda) * w;
-
     w = NOISY ? w.array() + noise.gen() : w;
-
     for (k = 0; k < batchSize; k++) {
       idx = sampleBuffer[k];
       w += (-eta * (gradBuffer(k) - g(idx)) / nSamples) * Xt.col(idx);
     }
-    // cout << "w: " << w << endl;
     for (k = 0; k < batchSize; k++) {
       idx = sampleBuffer[k];
       d += (gradBuffer(k) - g(idx)) * Xt.col(idx);
@@ -159,7 +89,6 @@ int IAG_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
     }
     // compute error
     if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
-      // cout << "w: " << w << endl;
       endTime = Clock::now();
       telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime - startTime)
                      .count() /
@@ -199,18 +128,12 @@ int IAG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
   }
   if (!Xt.isCompressed()) Xt.makeCompressed();
   if (!XtTest.isCompressed()) XtTest.makeCompressed();
-  // cout << "pass 1" << endl;
-  // cout << "g size: " << g.size() << endl;
   for (i = 0; i < maxIter; i++) {
-    // cout <<"iter " << i << " begin" << endl;
     eta = a * pow(b + i + 1, -gamma);
     idx = i % nSamples;
     Noise noise(0.0, sqrt(eta * 2 / nSamples));
     if (i) {
       for (j = outerStarts[idx]; j < (long)outerStarts[idx + 1]; j++) {
-        // cout << "innerIndices[j]: " << innerIndices[j] << endl;
-        // cout << "lastVisited[innerIndices[j]]: " <<
-        // lastVisited[innerIndices[j]] << endl;
         if (lastVisited[innerIndices[j]] == 0)
           w[innerIndices[j]] +=
               -d[innerIndices[j]] * cumSum[i - 1] + cumNoise[i - 1];
@@ -222,23 +145,16 @@ int IAG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
         lastVisited[innerIndices[j]] = i;
       }
     }
-    // cout << "pass 2" << endl;
     innerProd = 0;
     j = outerStarts[idx];
     for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
       innerProd += w[innerIndices[j]] * it.value();
     }
-    // cout << "pass 3" << endl;
-    // for (j = outerStarts[idx]; j < (long)outerStarts[idx + 1]; j++) {
-    //  innerProd += w[innerIndices[j]] * Xt[j];
-    // }
     innerProd *= c;  // rescale
     tmpGrad = LogisticPartialGradient(innerProd, y[idx]);
-    // cout << "pass 4" << endl;
     // update cumSum
     c *= 1 - eta * lambda;
     tmpFactor = eta / c / nSamples;
-    // cout << "pass 4.1" << endl;
     if (i == 0) {
       cumSum[0] = tmpFactor;
       cumNoise[0] = NOISY ? noise.gen() : 0 / c;
@@ -248,12 +164,8 @@ int IAG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
     }
 
     /* Step 3: approximate w_{i+1} */
-    // cout << "pass 4.2" << endl;
-    // cout << "idx: " << idx << endl;
-    // cout << "g: " << g << endl;
     tmpFactor =
         eta / c / nSamples * (tmpGrad - g[idx]);  // @NOTE biased estimator
-
     w += -tmpFactor * Xt.col(idx);
     // cblas_daxpyi(outerStarts[idx + 1] - outerStarts[idx], -tmpFactor, Xt +
     // outerStarts[idx], (int *)(innerIndices + outerStarts[idx]), w);
@@ -265,7 +177,6 @@ int IAG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
       d[innerIndices[j]] += it.value() * (tmpGrad - g[idx]);
     }
     g[idx] = tmpGrad;
-    // cout << "pass 6" << endl;
     // Re-normalize the parameter vector if it has gone numerically crazy
     if (((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) ||
         c > 1e100 || c < -1e100 || (c > 0 && c < 1e-100) ||
@@ -281,7 +192,6 @@ int IAG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
       cumSum[i] = 0;
       cumNoise[i] = 0;
       w = c * w;
-      // cblas_dscal(nVars, c, w, 1);
       c = 1;
 
       // @NOTE compute error
@@ -345,8 +255,6 @@ int IAG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
   }
   if (!Xt.isCompressed()) Xt.makeCompressed();
   if (!XtTest.isCompressed()) XtTest.makeCompressed();
-    cout << "pass 1" << endl;
-  cout << "g size: " << g.size() << endl;
   for (i = 0; i < maxIter; i++) {
     eta = a * pow(b + i + 1, -gamma);
     Noise noise(0.0, sqrt(eta * 2 / nSamples));
@@ -371,7 +279,6 @@ int IAG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
         }
       }
     }
-    cout << "pass 2" << endl;
     /* Step 2:  Compute derivative of loss \nabla f(w_{i}) */
     for (k = 0; k < batchSize; k++) {
       idx = sampleBuffer[k];
@@ -383,11 +290,9 @@ int IAG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
       innerProd *= c;  // rescale
       gradBuffer[k] = LogisticPartialGradient(innerProd, y[idx]);
     }
-    cout << "pass 3" << endl;
     // update cumSum
     c *= 1 - eta * lambda;
     tmpFactor = eta / c / nSamples;
-
     if (i == 0) {
       cumSum[0] = tmpFactor;
       cumNoise[0] = noise.gen() / c;
@@ -395,7 +300,6 @@ int IAG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
       cumSum[i] = cumSum[i - 1] + tmpFactor;
       cumNoise[i] = cumNoise[i - 1] + (NOISY ? noise.gen() : 0) / c;
     }
-	cout << "pass 4" << endl;
     /* Step 3: approximate w_{i+1} */
     for (k = 0; k < batchSize; k++) {
       idx = sampleBuffer[k];
@@ -407,7 +311,6 @@ int IAG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
       // @NOTE (int *) here is 64bit because mwIndex is 64bit, and we have to
       // link libmkl_intel_ilp64.a for 64bit integer
     }
-cout << "pass 5" << endl;
     /* Step 4: update d and g[idx] */
     for (k = 0; k < batchSize; k++) {
       idx = sampleBuffer[k];
@@ -417,7 +320,6 @@ cout << "pass 5" << endl;
       }
       g[idx] = gradBuffer[k];
     }
-cout << "pass 6" << endl;
     // Re-normalize the parameter vector if it has gone numerically crazy
     if (((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) ||
         c > 1e100 || c < -1e100 || (c > 0 && c < 1e-100) ||
@@ -458,7 +360,6 @@ cout << "pass 6" << endl;
       }
     }
   }
-cout << "pass 7" << endl;
   // at last, correct the iterate once more
   for (j = 0; j < nVars; j++) {
     if (lastVisited[j] == 0)

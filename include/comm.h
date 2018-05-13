@@ -2,25 +2,35 @@
 #define COMM_H
 
 #define DEBUG 1
-#define NOISY 0  // 0 for optimization, 1 for bayes model
-#define PRINT_FREQ 50 // print test error 50 times per epoch
-#define BILLION  1E9
+#define NOISY 0        // 0 for optimization, 1 for bayes model
+#define PRINT_FREQ 50  // print test error 50 times per epoch
+#define BILLION 1E9
 #define FILE_NAME_LENGTH 64
 #define ACCURACY 10E-5
 //#define EIGEN_USE_MKL_ALL //if Intel MKL is installed
+typedef enum {
+  DEFAULT = 0,
+  SUCCESS,
+  STEPLENGTHTOOBIG,
+  STEPLENGTHTOOSMALL,
+  ALLOCERROR,
+} ERRORCODE;
 
 #include <chrono>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
-#include <cmath>
 #include <string>
 #include <vector>
 
-#include "Eigen/Sparse"
 #include "Eigen/Dense"
-#include "Noise.h"
-#include "LogisticError.h"
+#include "Eigen/Sparse"
 #include "LogisticGradient.h"
+#include "Noise.h"
+#include "DenseMat.h"
+#include "SparseMat.h"
+
+
 
 class LR {
  private:
@@ -45,10 +55,11 @@ class LR {
     VectorXd siglog = sigmoid.array().log();
     VectorXd siglogimpl = (1 - sigmoid.array()).log();
     // mean maybe wrong here
-    double loss = -(y.dot(siglog) + (1 - y.array())*siglogimpl.array()).mean();
+    double loss =
+        -(y.dot(siglog) + (1 - y.array()) * siglogimpl.array()).mean();
     double regularizer = this->lambda / 2 * (w.array().square()).sum();
     return loss + regularizer;
-  } 
+  }
   double loglikelihood(VectorXd &w, MatrixXd &X, VectorXd &y) {
     VectorXd sigmoid;
     sigfunc(w, X, y, sigmoid);
@@ -61,13 +72,13 @@ class LR {
   VectorXd grad_noreg(VectorXd &w, MatrixXd &X, VectorXd &y) {
     int d = X.rows(), n = X.cols();
     VectorXd tmpExp = (-(X.adjoint() * w)).array().exp();
-    VectorXd gradient = X * (1 + tmpExp.array() - y.array()).matrix().cwiseInverse() / n;
-  	return gradient;
+    VectorXd gradient =
+        X * (1 + tmpExp.array() - y.array()).matrix().cwiseInverse() / n;
+    return gradient;
   }
   void hypothesis(VectorXd &w, MatrixXd &X, VectorXd &hypothesis) {
-    hypothesis = (1 + (-X.adjoint() * w).array().exp().array())
-        .matrix()
-        .cwiseInverse();
+    hypothesis =
+        (1 + (-X.adjoint() * w).array().exp().array()).matrix().cwiseInverse();
   }
   void costprint(VectorXd &w, MatrixXd &X, VectorXd &y, int stage) {
     double cost = costfunc(w, X, y);
@@ -95,9 +106,7 @@ class LR {
     }
     return score / n;
   }
-  ~LR(){
-  	;
-  };
+  ~LR() { ; };
 };
 class RR {
  private:
@@ -106,6 +115,7 @@ class RR {
   double mu = 0;
   double optSolution;
   double optConst;
+
  public:
   RR(double lambda = 0, double L = 0, double mu = 0) {
     this->lambda = lambda;
@@ -114,22 +124,22 @@ class RR {
   }
   double costfunc(VectorXd &w, MatrixXd &X, VectorXd &y) {
     VectorXd sigmoid;
-    double loss = (y-X.adjoint()*w).array().square().mean() / 2;
+    double loss = (y - X.adjoint() * w).array().square().mean() / 2;
     double regularizer = this->lambda / 2 * (w.array().square()).sum();
     return loss + regularizer;
-  } 
+  }
   double loglikelihood(VectorXd &w, MatrixXd &X, VectorXd &y) {
     VectorXd innerProd;
-    innerProd = X.adjoint()*w;
-    double loglikelihood = 1/2*(innerProd-y).array().square().mean();
+    innerProd = X.adjoint() * w;
+    double loglikelihood = 1 / 2 * (innerProd - y).array().square().mean();
     return loglikelihood;
   }
   VectorXd grad_noreg(VectorXd &w, MatrixXd &X, VectorXd &y) {
     int d = X.rows(), n = X.cols();
-    VectorXd gradient = 1/n*(X*(X.adjoint()*w-y));
+    VectorXd gradient = 1 / n * (X * (X.adjoint() * w - y));
   }
   void hypothesis(VectorXd &w, MatrixXd &X, VectorXd &hypothesis) {
-  	hypothesis = X.adjoint()*w;
+    hypothesis = X.adjoint() * w;
   }
   void costprint(VectorXd &w, MatrixXd &X, VectorXd &y, int stage) {
     double cost = costfunc(w, X, y);
@@ -157,30 +167,30 @@ class RR {
     }
     return score / n;
   }
-  ~RR(){
-  	;
-  };
+  ~RR() { ; };
 };
-
 extern int epochCounter;
 extern FILE *fp;
 extern std::chrono::high_resolution_clock::time_point startTime;
 extern int SPARSE;
 extern LR objFuncLR;
 extern RR objFuncRR;
-//Windows timer resolution
+// Windows timer resolution
 #if defined(_WIN32) || defined(_WIN64)
 using Clock = std::chrono::high_resolution_clock;
 #endif
-//Linux/Unix timer resolution
+// Linux/Unix timer resolution
 #if defined(__linux__) || defined(__unix) || defined(__unix__)
 // temporary
 using Clock = std::chrono::high_resolution_clock;
-//when extern variables placed here, endif seems not match to the previous unmatched one but closest one??
+// when extern variables placed here, endif seems not match to the previous
+// unmatched one but closest one??
 #endif
-// void LogisticGradient(double *w, const mxArray *XtArray, double *y, double *G);
+// void LogisticGradient(double *w, const mxArray *XtArray, double *y, double
+// *G);
 
-// void RidgeError(double *w, const mxArray *XtArray, double *y, double epoch, double telapsed, FILE *fp);
+// void RidgeError(double *w, const mxArray *XtArray, double *y, double epoch,
+// double telapsed, FILE *fp);
 
 // void RidgeGradient(double *w, const mxArray *XtArray, double *y, double *G);
 
