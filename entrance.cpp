@@ -12,12 +12,13 @@ int epochCounter;
 FILE *fp;
 std::chrono::high_resolution_clock::time_point startTime;
 int SPARSE;
+LR objFuncLR;
+RR objFuncRR;
 int LogisticEntrance(int algorithmType, int datasetNum, SparseMatrix<double> &XtS, VectorXd & y, SparseMatrix<double> &XtTestS, VectorXd & yTest){
     VectorXd w, wtilde, G, sumIG, gradients;
     double lambda , eta, a, b, gamma;
 	int maxIter, batchSize, passes, maxRunTime;
 	SPARSE = 0;
-	cout << "Your choice of algorithm: " << algorithmType << endl;
 	int nVars, nSamples, flag;
 	string filename;
 	int *innerIndices,*outerStarts;
@@ -54,7 +55,6 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt, VectorXd &
     double lambda , eta, a, b, gamma;
 	int maxIter, batchSize, passes, maxRunTime;
 	SPARSE = 0;
-	cout << "Your choice of algorithm: " << algorithmType << endl;
 	int nVars, nSamples, flag;
 	string filename;
     w = MatrixXd::Zero(Xt.rows(),1);
@@ -73,6 +73,9 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt, VectorXd &
 	    					IAG_LogisticInnerLoopSingle(w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime)
     			)break;
     		}
+	    	printf("training accuracy: %f\n", objFuncLR.score(w, Xt, y));
+			printf("test accuracy: %f\n", objFuncLR.score(w, XtTest, yTest));
+			// fprintf('time elapsed: %f\n', telapsed);
     		break;
     	case 2:
     		IAGA_init(Xt, w, XtTest, yTest, lambda, eta, a, b, gamma, maxIter, batchSize, passes, maxRunTime, filename);
@@ -145,8 +148,8 @@ void datasetOption(int &datasetNum){
 void algorithmOption(int &algorithmType){
 	const int NUMBEROFAlGORITHM = 7;
 	const string algorithms[NUMBEROFAlGORITHM] = {"IAG","IAGA","SAG","SGGA","SGD","SIG","SVRG"};
-	for(int i =0;i<NUMBEROFAlGORITHM;++i){
-		cout << i+1 << "." << algorithms[i] << endl;
+        for (int i = 0; i < NUMBEROFAlGORITHM; ++i) {
+          cout << i + 1 << "." << algorithms[i] << endl;
 	}
 	cout << "Enter your choice of algorithm: (0 to quit)" << endl;
 	while(1){

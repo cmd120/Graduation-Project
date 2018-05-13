@@ -39,5 +39,6 @@ SIG_logistic.o:SIG_logistic.cpp include/SIG.h
 	g++ -std=c++11 -c SIG_logistic.cpp
 SVRG_logistic.o:SVRG_logistic.cpp include/SVRG.h
 	g++ -std=c++11 -c SVRG_logistic.cpp
+.PHONY : clean
 clean:
 	rm run $(objects)
