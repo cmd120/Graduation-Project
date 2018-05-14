@@ -44,15 +44,13 @@ int LogisticEntrance(int algorithmType, int datasetNum,
       algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? IAG_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
-                                             gradients, lambda, maxIter,
-                                             nSamples, nVars, pass, a, b, gamma,
-                                             maxRunTime, batchSize)
-                : IAG_LogisticInnerLoopSingle(
-                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? IAG_LogisticInnerLoopBatch(
+                  w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : IAG_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, sumIG,
+                                          gradients, lambda, maxIter, nSamples,
+                                          nVars, pass, a, b, gamma, maxRunTime)
       }
       break;
     case 2:
@@ -60,15 +58,13 @@ int LogisticEntrance(int algorithmType, int datasetNum,
       algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? IAGA_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
-                                              gradients, lambda, maxIter,
-                                              nSamples, nVars, pass, a, b,
-                                              gamma, maxRunTime, batchSize)
-                : IAGA_LogisticInnerLoopSingle(
-                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? IAGA_LogisticInnerLoopBatch(
+                  w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : IAGA_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, sumIG,
+                                           gradients, lambda, maxIter, nSamples,
+                                           nVars, pass, a, b, gamma, maxRunTime)
       }
       break;
     case 3:
@@ -76,15 +72,13 @@ int LogisticEntrance(int algorithmType, int datasetNum,
       algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? SAG_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
-                                             gradients, lambda, maxIter,
-                                             nSamples, nVars, pass, a, b, gamma,
-                                             maxRunTime, batchSize)
-                : SAG_LogisticInnerLoopSingle(
-                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? SAG_LogisticInnerLoopBatch(
+                  w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : SAG_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, sumIG,
+                                          gradients, lambda, maxIter, nSamples,
+                                          nVars, pass, a, b, gamma, maxRunTime)
       }
       break;
     case 4:
@@ -92,15 +86,13 @@ int LogisticEntrance(int algorithmType, int datasetNum,
       algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? SAGA_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
-                                              gradients, lambda, maxIter,
-                                              nSamples, nVars, pass, a, b,
-                                              gamma, maxRunTime, batchSize)
-                : SAGA_LogisticInnerLoopSingle(
-                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? SAGA_LogisticInnerLoopBatch(
+                  w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : SAGA_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, sumIG,
+                                           gradients, lambda, maxIter, nSamples,
+                                           nVars, pass, a, b, gamma, maxRunTime)
       }
       break;
     case 5:
@@ -108,15 +100,13 @@ int LogisticEntrance(int algorithmType, int datasetNum,
       algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? SGD_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
-                                             gradients, lambda, maxIter,
-                                             nSamples, nVars, pass, a, b, gamma,
-                                             maxRunTime, batchSize)
-                : SGD_LogisticInnerLoopSingle(
-                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? SGD_LogisticInnerLoopBatch(
+                  w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : SGD_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, sumIG,
+                                          gradients, lambda, maxIter, nSamples,
+                                          nVars, pass, a, b, gamma, maxRunTime)
       }
       break;
     case 6:
@@ -125,14 +115,13 @@ int LogisticEntrance(int algorithmType, int datasetNum,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
         LogisticGradient(wtilde, G, XtS, y);
-        if (batchSize >= 2
-                ? SIG_LogisticInnerLoopBatch(
-                      w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
-                      nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
-                : SIG_LogisticInnerLoopSingle(
-                      w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
-                      nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? SIG_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, wtilde, G,
+                                         lambda, maxIter, nSamples, nVars, pass,
+                                         a, b, gamma, maxRunTime, batchSize)
+            : SIG_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, wtilde, G,
+                                          lambda, maxIter, nSamples, nVars,
+                                          pass, a, b, gamma, maxRunTime)
       }
       break;
     case 7:
@@ -141,14 +130,13 @@ int LogisticEntrance(int algorithmType, int datasetNum,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
         LogisticGradient(wtilde, G, XtS, y);
-        if (batchSize >= 2
-                ? SVRG_LogisticInnerLoopBatch(
-                      w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
-                      nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
-                : SVRG_LogisticInnerLoopSingle(
-                      w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
-                      nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? SVRG_LogisticInnerLoopBatch(
+                  w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : SVRG_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, wtilde, G,
+                                           lambda, maxIter, nSamples, nVars,
+                                           pass, a, b, gamma, maxRunTime)
       }
       break;
     default:;
@@ -181,15 +169,13 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
       algorithmInit(Xt, w, XtTest, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? IAG_LogisticInnerLoopBatch(w, Xt, y, XtTest, yTest, sumIG,
-                                             gradients, lambda, maxIter,
-                                             nSamples, nVars, pass, a, b, gamma,
-                                             maxRunTime, batchSize)
-                : IAG_LogisticInnerLoopSingle(
-                      w, Xt, y, XtTest, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? IAG_LogisticInnerLoopBatch(
+                  w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : IAG_LogisticInnerLoopSingle(w, Xt, y, XtTest, yTest, sumIG,
+                                          gradients, lambda, maxIter, nSamples,
+                                          nVars, pass, a, b, gamma, maxRunTime)
       }
       break;
     case 2:
@@ -197,15 +183,13 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
       algorithmInit(Xt, w, XtTest, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? IAGA_LogisticInnerLoopBatch(w, Xt, y, XtTest, yTest, sumIG,
-                                              gradients, lambda, maxIter,
-                                              nSamples, nVars, pass, a, b,
-                                              gamma, maxRunTime, batchSize)
-                : IAGA_LogisticInnerLoopSingle(
-                      w, Xt, y, XtTest, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? IAGA_LogisticInnerLoopBatch(
+                  w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : IAGA_LogisticInnerLoopSingle(w, Xt, y, XtTest, yTest, sumIG,
+                                           gradients, lambda, maxIter, nSamples,
+                                           nVars, pass, a, b, gamma, maxRunTime)
       }
       break;
     case 3:
@@ -213,15 +197,13 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
       algorithmInit(Xt, w, XtTest, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? SAG_LogisticInnerLoopBatch(w, Xt, y, XtTest, yTest, sumIG,
-                                             gradients, lambda, maxIter,
-                                             nSamples, nVars, pass, a, b, gamma,
-                                             maxRunTime, batchSize)
-                : SAG_LogisticInnerLoopSingle(
-                      w, Xt, y, XtTest, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? SAG_LogisticInnerLoopBatch(
+                  w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : SAG_LogisticInnerLoopSingle(w, Xt, y, XtTest, yTest, sumIG,
+                                          gradients, lambda, maxIter, nSamples,
+                                          nVars, pass, a, b, gamma, maxRunTime)
       }
       break;
     case 4:
@@ -229,15 +211,13 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
       algorithmInit(Xt, w, XtTest, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? SAGA_LogisticInnerLoopBatch(w, Xt, y, XtTest, yTest, sumIG,
-                                              gradients, lambda, maxIter,
-                                              nSamples, nVars, pass, a, b,
-                                              gamma, maxRunTime, batchSize)
-                : SAGA_LogisticInnerLoopSingle(
+        batchSize >= 2
+            ? SAGA_LogisticInnerLoopBatch(
+                  w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize
+                  : SAGA_LogisticInnerLoopSingle(
                       w, Xt, y, XtTest, yTest, sumIG, gradients, lambda,
                       maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
       }
       break;
     case 5:
@@ -245,15 +225,13 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
       algorithmInit(Xt, w, XtTest, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        if (batchSize >= 2
-                ? SGD_LogisticInnerLoopBatch(w, Xt, y, XtTest, yTest, sumIG,
-                                             gradients, lambda, maxIter,
-                                             nSamples, nVars, pass, a, b, gamma,
-                                             maxRunTime, batchSize)
-                : SGD_LogisticInnerLoopSingle(
-                      w, Xt, y, XtTest, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? SGD_LogisticInnerLoopBatch(
+                  w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : SGD_LogisticInnerLoopSingle(w, Xt, y, XtTest, yTest, sumIG,
+                                          gradients, lambda, maxIter, nSamples,
+                                          nVars, pass, a, b, gamma, maxRunTime)
       }
       break;
     case 6:
@@ -262,14 +240,13 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
         LogisticGradient(wtilde, G, Xt, y);
-        if (batchSize >= 2
-                ? SIG_LogisticInnerLoopBatch(
-                      w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter,
-                      nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
-                : SIG_LogisticInnerLoopSingle(
-                      w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter,
-                      nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? SIG_LogisticInnerLoopBatch(w, Xt, y, XtTest, yTest, wtilde, G,
+                                         lambda, maxIter, nSamples, nVars, pass,
+                                         a, b, gamma, maxRunTime, batchSize)
+            : SIG_LogisticInnerLoopSingle(w, Xt, y, XtTest, yTest, wtilde, G,
+                                          lambda, maxIter, nSamples, nVars,
+                                          pass, a, b, gamma, maxRunTime)
       }
       break;
     case 7:
@@ -278,14 +255,13 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
         LogisticGradient(wtilde, G, Xt, y);
-        if (batchSize >= 2
-                ? SVRG_LogisticInnerLoopBatch(
-                      w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter,
-                      nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
-                : SVRG_LogisticInnerLoopSingle(
-                      w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter,
-                      nSamples, nVars, pass, a, b, gamma, maxRunTime))
-          break;
+        batchSize >= 2
+            ? SVRG_LogisticInnerLoopBatch(
+                  w, Xt, y, XtTest, yTest, wtilde, G, lambda, maxIter, nSamples,
+                  nVars, pass, a, b, gamma, maxRunTime, batchSize)
+            : SVRG_LogisticInnerLoopSingle(w, Xt, y, XtTest, yTest, wtilde, G,
+                                           lambda, maxIter, nSamples, nVars,
+                                           pass, a, b, gamma, maxRunTime)
       }
       break;
     default:;
@@ -309,7 +285,6 @@ void datasetOption(int &datasetNum) {
   return;
 }
 void algorithmOption(int &algorithmType) {
-  cout << "123" << endl;
   const int NUMBEROFAlGORITHM = 7;
   const string algorithms[NUMBEROFAlGORITHM] = {"IAG", "IAGA", "SAG", "SAGA",
                                                 "SGD", "SIG",  "SVRG"};
@@ -362,12 +337,10 @@ int main(int argc, char *argv[]) {
     algorithmOption(algorithmType);
     if (algorithmType) {
       int ret;
-      if (SPARSE) {
-        ret =
-            LogisticEntrance(algorithmType, datasetNum, XtS, y, XtTestS, yTest);
-      } else {
-        ret = LogisticEntrance(algorithmType, datasetNum, Xt, y, XtTest, yTest);
-      }
+      ret = SPARSE ? LogisticEntrance(algorithmType, datasetNum, XtS, y,
+                                      XtTestS, yTest)
+                   : LogisticEntrance(algorithmType, datasetNum, Xt, y, XtTest,
+                                      yTest);
       if (ret) break;
     } else {
       break;
