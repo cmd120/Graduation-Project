@@ -40,23 +40,123 @@ int LogisticEntrance(int algorithmType, int datasetNum,
   nSamples = XtS.cols();
   switch (algorithmType) {
     case 1:
+      filename = "IAG";
       algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
         if (batchSize >= 2
-                ? IAG_LogisticInnerLoopBatch(
-                      w, XtS, y, innerIndices, outerStarts, XtTestS, yTest,
-                      lambda, sumIG, gradients, maxIter, nSamples, nVars, pass,
-                      a, b, gamma, maxRunTime, batchSize)
+                ? IAG_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
+                                             gradients, lambda, maxIter,
+                                             nSamples, nVars, pass, a, b, gamma,
+                                             maxRunTime, batchSize)
                 : IAG_LogisticInnerLoopSingle(
-                      w, XtS, y, innerIndices, outerStarts, XtTestS, yTest,
-                      lambda, sumIG, gradients, maxIter, nSamples, nVars, pass,
-                      a, b, gamma, maxRunTime))
+                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
+                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
+          break;
+      }
+      break;
+    case 2:
+      filename = "IAGA";
+      algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
+                    batchSize, passes, maxRunTime, filename, datasetNum);
+      for (int pass = 0; pass < passes; ++pass) {
+        if (batchSize >= 2
+                ? IAGA_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
+                                              gradients, lambda, maxIter,
+                                              nSamples, nVars, pass, a, b,
+                                              gamma, maxRunTime, batchSize)
+                : IAGA_LogisticInnerLoopSingle(
+                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
+                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
+          break;
+      }
+      break;
+    case 3:
+      filename = "SAG";
+      algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
+                    batchSize, passes, maxRunTime, filename, datasetNum);
+      for (int pass = 0; pass < passes; ++pass) {
+        if (batchSize >= 2
+                ? SAG_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
+                                             gradients, lambda, maxIter,
+                                             nSamples, nVars, pass, a, b, gamma,
+                                             maxRunTime, batchSize)
+                : SAG_LogisticInnerLoopSingle(
+                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
+                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
+          break;
+      }
+      break;
+    case 4:
+      filename = "SAGA";
+      algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
+                    batchSize, passes, maxRunTime, filename, datasetNum);
+      for (int pass = 0; pass < passes; ++pass) {
+        if (batchSize >= 2
+                ? SAGA_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
+                                              gradients, lambda, maxIter,
+                                              nSamples, nVars, pass, a, b,
+                                              gamma, maxRunTime, batchSize)
+                : SAGA_LogisticInnerLoopSingle(
+                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
+                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
+          break;
+      }
+      break;
+    case 5:
+      filename = "SGD";
+      algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
+                    batchSize, passes, maxRunTime, filename, datasetNum);
+      for (int pass = 0; pass < passes; ++pass) {
+        if (batchSize >= 2
+                ? SGD_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, sumIG,
+                                             gradients, lambda, maxIter,
+                                             nSamples, nVars, pass, a, b, gamma,
+                                             maxRunTime, batchSize)
+                : SGD_LogisticInnerLoopSingle(
+                      w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda,
+                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime))
+          break;
+      }
+      break;
+    case 6:
+      filename = "SIG";
+      algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
+                    batchSize, passes, maxRunTime, filename, datasetNum);
+      for (int pass = 0; pass < passes; ++pass) {
+        LogisticGradient(wtilde, G, XtS, y);
+        if (batchSize >= 2
+                ? SIG_LogisticInnerLoopBatch(
+                      w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
+                      nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+                : SIG_LogisticInnerLoopSingle(
+                      w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
+                      nSamples, nVars, pass, a, b, gamma, maxRunTime))
+          break;
+      }
+      break;
+    case 7:
+      filename = "SVRG";
+      algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
+                    batchSize, passes, maxRunTime, filename, datasetNum);
+      for (int pass = 0; pass < passes; ++pass) {
+        LogisticGradient(wtilde, G, XtS, y);
+        if (batchSize >= 2
+                ? SVRG_LogisticInnerLoopBatch(
+                      w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
+                      nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
+                : SVRG_LogisticInnerLoopSingle(
+                      w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
+                      nSamples, nVars, pass, a, b, gamma, maxRunTime))
           break;
       }
       break;
     default:;
   }
+  MatrixXd tmpXt = MatrixXd(XtS), tmpXtTest = MatrixXd(XtTestS);
+  printf("training accuracy: %f\n", objFuncLR.score(w, tmpXt, y));
+  printf("test accuracy: %f\n", objFuncLR.score(w, tmpXtTest, yTest));
+  // fprintf('time elapsed: %f\n', telapsed);
   return 0;
 }
 int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
@@ -190,8 +290,8 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
       break;
     default:;
   }
-  printf("%s training accuracy: %f\n", filename, objFuncLR.score(w, Xt, y));
-  printf("%s test accuracy: %f\n", filename, objFuncLR.score(w, XtTest, yTest));
+  printf("training accuracy: %f\n", objFuncLR.score(w, Xt, y));
+  printf("test accuracy: %f\n", objFuncLR.score(w, XtTest, yTest));
   // fprintf('time elapsed: %f\n', telapsed);
   return 0;
 }
@@ -209,13 +309,14 @@ void datasetOption(int &datasetNum) {
   return;
 }
 void algorithmOption(int &algorithmType) {
+  cout << "123" << endl;
   const int NUMBEROFAlGORITHM = 7;
   const string algorithms[NUMBEROFAlGORITHM] = {"IAG", "IAGA", "SAG", "SAGA",
                                                 "SGD", "SIG",  "SVRG"};
+  cout << "Enter your choice of algorithm: (0 to quit)" << endl;
   for (int i = 0; i < NUMBEROFAlGORITHM; ++i) {
     cout << i + 1 << "." << algorithms[i] << endl;
   }
-  cout << "Enter your choice of algorithm: (0 to quit)" << endl;
   while (1) {
     if (cin >> algorithmType) {
       if (algorithmType)
@@ -238,7 +339,7 @@ int main(int argc, char *argv[]) {
   MatrixXd Xt, XtTest;
   SparseMatrix<double> XtS, XtTestS;
   VectorXd y, yTest;
-  int algorithmType, dataset, datasetNum;
+  int algorithmType = 0, datasetNum;
 
   datasetOption(datasetNum);
   switch (datasetNum) {
@@ -247,6 +348,7 @@ int main(int argc, char *argv[]) {
       break;
     case 2:
       covtype_read(Xt, y, XtTest, yTest);
+      break;
   }
   cout << "dataset loaded." << endl;
   if (SPARSE) {
@@ -260,10 +362,12 @@ int main(int argc, char *argv[]) {
     algorithmOption(algorithmType);
     if (algorithmType) {
       int ret;
-      ret = SPARSE ? LogisticEntrance(algorithmType, datasetNum, XtS, y,
-                                      XtTestS, yTest)
-                   : LogisticEntrance(algorithmType, datasetNum, Xt, y, XtTest,
-                                      yTest);
+      if (SPARSE) {
+        ret =
+            LogisticEntrance(algorithmType, datasetNum, XtS, y, XtTestS, yTest);
+      } else {
+        ret = LogisticEntrance(algorithmType, datasetNum, Xt, y, XtTest, yTest);
+      }
       if (ret) break;
     } else {
       break;
