@@ -142,7 +142,7 @@ int LogisticEntrance(int algorithmType, int datasetNum,
     default:;
   }
   if (DEBUG) {
-    cout << "Xt'*w: " << XtTest.adjoint() * w << endl;
+    cout << "Xt'*w: " << XtTests.adjoint() * w << endl;
     cout << "yTest: " << yTest << endl;
     cout << "w:" << w << endl;
   }
@@ -270,6 +270,11 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
       }
       break;
     default:;
+  }
+  if (DEBUG) {
+    cout << "Xt'*w: " << XtTest.adjoint() * w << endl;
+    cout << "yTest: " << yTest << endl;
+    cout << "w:" << w << endl;
   }
   printf("training accuracy: %f\n", objFuncLR.score(w, Xt, y));
   printf("test accuracy: %f\n", objFuncLR.score(w, XtTest, yTest));
