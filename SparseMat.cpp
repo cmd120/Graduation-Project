@@ -39,7 +39,6 @@ void algorithmInit(SparseMatrix<double> &Xt, VectorXd &w,
                    double &lambda, double &eta, double &a, double &b,
                    double &gamma, int &maxIter, int &batchSize, int &passes,
                    int &maxRunTime, string &filename, int &datasetNum) {
-  startTime = Clock::now();
   cout << "Input batchSize: " << endl;
   cin >> batchSize;
   filename = filename + "_output_sparse_" + to_string(batchSize);
@@ -67,5 +66,6 @@ void algorithmInit(SparseMatrix<double> &Xt, VectorXd &w,
     cout << "enter passes:" << endl;
     cin >> passes;
   }
+  startTime = Clock::now();
   return;
 }

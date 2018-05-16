@@ -15,11 +15,11 @@ ERRORCODE LogisticError(const VectorXd &w, const MatrixXd &Xt,
   for (i = 0; i < nSamples; i++) {
     double debugInfo;
     tmp = 1.0 / (1 + exp(-tmpRes(i)));
-    if (tmp <= 0 || tmp >= 1) {
-      cout << "tmp: " << tmp << endl;
-      cout << "problem tmpRes(i): " << tmpRes(i) << endl;
-      debugInfo = y(i) * log(tmp) + (1 - y(i)) * log(1 - tmp);
-      return ret;
+    if (tmp == 1) {
+      if (y(i) == 1)
+        continue;
+      else
+        cout << "Problem tmpRes(i): " << tmpRes(i) << endl;
     }
     sumError += y(i) * log(tmp) + (1 - y(i)) * log(1 - tmp);
   }
@@ -41,11 +41,11 @@ ERRORCODE LogisticError(const VectorXd &w, const SparseMatrix<double> &Xt,
   for (i = 0; i < nSamples; i++) {
     double debugInfo;
     tmp = 1.0 / (1 + exp(-tmpRes(i)));
-    if (tmp <= 0 || tmp >= 1) {
-      cout << "tmp: " << tmp << endl;
-      cout << "problem tmpRes(i): " << tmpRes(i) << endl;
-      debugInfo = y(i) * log(tmp) + (1 - y(i)) * log(1 - tmp);
-      return ret = STEPLENGTHTOOBIG;
+    if (tmp == 1) {
+      if (y(i) == 1)
+        continue;
+      else
+        cout << "Problem tmpRes(i): " << tmpRes(i) << endl;
     }
     sumError += y(i) * log(tmp) + (1 - y(i)) * log(1 - tmp);
   }

@@ -142,11 +142,15 @@ int LogisticEntrance(int algorithmType, int datasetNum,
     default:;
   }
   if (DEBUG) {
-    cout << "Xt'*w: " << XtTests.adjoint() * w << endl;
-    cout << "yTest: " << yTest << endl;
-    cout << "w:" << w << endl;
+    cout << "hypothesis: " << 1 / (1 + (-XtTestS.adjoint() * w).array().exp())
+         << endl;
   }
   MatrixXd tmpXt = MatrixXd(XtS), tmpXtTest = MatrixXd(XtTestS);
+  auto endTime = Clock::now();
+  printf(
+      "telapsed %f\n",
+      chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count() /
+          BILLION);
   printf("training accuracy: %f\n", objFuncLR.score(w, tmpXt, y));
   printf("test accuracy: %f\n", objFuncLR.score(w, tmpXtTest, yTest));
   // fprintf('time elapsed: %f\n', telapsed);
@@ -272,10 +276,17 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
     default:;
   }
   if (DEBUG) {
-    cout << "Xt'*w: " << XtTest.adjoint() * w << endl;
-    cout << "yTest: " << yTest << endl;
-    cout << "w:" << w << endl;
+    // cout << "Xt'*w: " << XtTest.adjoint() * w << endl;
+    // cout << "yTest: " << yTest << endl;
+    // cout << "w:" << w << endl;
+    cout << "hypothesis: " << 1 / (1 + (-XtTest.adjoint() * w).array().exp())
+         << endl;
   }
+  auto endTime = Clock::now();
+  printf(
+      "telapsed %f\n",
+      chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count() /
+          BILLION);
   printf("training accuracy: %f\n", objFuncLR.score(w, Xt, y));
   printf("test accuracy: %f\n", objFuncLR.score(w, XtTest, yTest));
   // fprintf('time elapsed: %f\n', telapsed);
