@@ -104,6 +104,10 @@ class LR {
     for (int i = 0; i < n; i++) {
       if (labels[i] == y[i]) score += 1;
     }
+    if(DEBUG){
+      cout << "score: "<< score << endl;
+      cout << "n: " << n << endl;
+    }
     return score / n;
   }
   ~LR() { ; };

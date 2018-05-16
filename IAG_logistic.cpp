@@ -97,6 +97,7 @@ int IAG_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
                     fp);
       epochCounter = (epochCounter + 1) % PRINT_FREQ;
       if (telapsed >= maxRunTime) {
+        delete[] sampleBuffer;
         return 1;
       }
     }

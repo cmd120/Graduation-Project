@@ -62,9 +62,9 @@ int LogisticEntrance(int algorithmType, int datasetNum,
             ? IAGA_LogisticInnerLoopBatch(
                   w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda, maxIter,
                   nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
-            : IAGA_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, sumIG,
-                                           gradients, lambda, maxIter, nSamples,
-                                           nVars, pass, a, b, gamma, maxRunTime);
+            : IAGA_LogisticInnerLoopSingle(
+                  w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime);
       }
       break;
     case 3:
@@ -90,9 +90,9 @@ int LogisticEntrance(int algorithmType, int datasetNum,
             ? SAGA_LogisticInnerLoopBatch(
                   w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda, maxIter,
                   nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
-            : SAGA_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, sumIG,
-                                           gradients, lambda, maxIter, nSamples,
-                                           nVars, pass, a, b, gamma, maxRunTime);
+            : SAGA_LogisticInnerLoopSingle(
+                  w, XtS, y, XtTestS, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime);
       }
       break;
     case 5:
@@ -141,6 +141,11 @@ int LogisticEntrance(int algorithmType, int datasetNum,
       break;
     default:;
   }
+  if (DEBUG) {
+    cout << "Xt'*w: " << XtTest.adjoint() * w << endl;
+    cout << "yTest: " << yTest << endl;
+    cout << "w:" << w << endl;
+  }
   MatrixXd tmpXt = MatrixXd(XtS), tmpXtTest = MatrixXd(XtTestS);
   printf("training accuracy: %f\n", objFuncLR.score(w, tmpXt, y));
   printf("test accuracy: %f\n", objFuncLR.score(w, tmpXtTest, yTest));
@@ -187,9 +192,9 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
             ? IAGA_LogisticInnerLoopBatch(
                   w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter,
                   nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
-            : IAGA_LogisticInnerLoopSingle(w, Xt, y, XtTest, yTest, sumIG,
-                                           gradients, lambda, maxIter, nSamples,
-                                           nVars, pass, a, b, gamma, maxRunTime);
+            : IAGA_LogisticInnerLoopSingle(
+                  w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime);
       }
       break;
     case 3:
@@ -215,9 +220,9 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
             ? SAGA_LogisticInnerLoopBatch(
                   w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter,
                   nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
-                  : SAGA_LogisticInnerLoopSingle(
-                      w, Xt, y, XtTest, yTest, sumIG, gradients, lambda,
-                      maxIter, nSamples, nVars, pass, a, b, gamma, maxRunTime);
+            : SAGA_LogisticInnerLoopSingle(
+                  w, Xt, y, XtTest, yTest, sumIG, gradients, lambda, maxIter,
+                  nSamples, nVars, pass, a, b, gamma, maxRunTime);
       }
       break;
     case 5:
