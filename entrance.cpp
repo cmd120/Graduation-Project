@@ -125,6 +125,7 @@ int LogisticEntrance(int algorithmType, int datasetNum,
                                           maxIter, nSamples, nVars, pass, a, b,
                                           gamma, maxRunTime);
       }
+      wtilde = w;
       break;
     case 7:
       filename = "SVRG";
@@ -142,6 +143,7 @@ int LogisticEntrance(int algorithmType, int datasetNum,
                                            maxIter, nSamples, nVars, pass, a, b,
                                            gamma, maxRunTime);
       }
+      wtilde = w;
       break;
     default:;
   }
