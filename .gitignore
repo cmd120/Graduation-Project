@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+# Output
+*_output_*
