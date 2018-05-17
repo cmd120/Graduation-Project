@@ -4,5 +4,8 @@
 using namespace Eigen;
 using namespace std;
 void LogisticGradient(VectorXd &wtilde, VectorXd &G, const MatrixXd &Xt,
-                      VectorXd &);
+                      VectorXd &y);
+void LogisticGradient(VectorXd &wtilde, VectorXd &G, int *innerIndices,
+                      int *outerStarts, const SparseMatrix<double> &Xt,
+                      VectorXd &y);
 #endif

@@ -114,14 +114,16 @@ int LogisticEntrance(int algorithmType, int datasetNum,
       algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        LogisticGradient(wtilde, G, XtS, y);
+        LogisticGradient(wtilde, G, innerIndices, outerStarts, XtS, y);
         batchSize >= 2
-            ? SIG_LogisticInnerLoopBatch(w, XtS, y, XtTestS, yTest, wtilde, G,
-                                         lambda, maxIter, nSamples, nVars, pass,
-                                         a, b, gamma, maxRunTime, batchSize)
-            : SIG_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, wtilde, G,
-                                          lambda, maxIter, nSamples, nVars,
-                                          pass, a, b, gamma, maxRunTime);
+            ? SIG_LogisticInnerLoopBatch(w, XtS, y, innerIndices, outerStarts,
+                                         XtTestS, yTest, wtilde, G, lambda,
+                                         maxIter, nSamples, nVars, pass, a, b,
+                                         gamma, maxRunTime, batchSize)
+            : SIG_LogisticInnerLoopSingle(w, XtS, y, innerIndices, outerStarts,
+                                          XtTestS, yTest, wtilde, G, lambda,
+                                          maxIter, nSamples, nVars, pass, a, b,
+                                          gamma, maxRunTime);
       }
       break;
     case 7:
@@ -129,14 +131,16 @@ int LogisticEntrance(int algorithmType, int datasetNum,
       algorithmInit(XtS, w, XtTestS, yTest, lambda, eta, a, b, gamma, maxIter,
                     batchSize, passes, maxRunTime, filename, datasetNum);
       for (int pass = 0; pass < passes; ++pass) {
-        LogisticGradient(wtilde, G, XtS, y);
+        LogisticGradient(wtilde, G, innerIndices, outerStarts, XtS, y);
         batchSize >= 2
-            ? SVRG_LogisticInnerLoopBatch(
-                  w, XtS, y, XtTestS, yTest, wtilde, G, lambda, maxIter,
-                  nSamples, nVars, pass, a, b, gamma, maxRunTime, batchSize)
-            : SVRG_LogisticInnerLoopSingle(w, XtS, y, XtTestS, yTest, wtilde, G,
-                                           lambda, maxIter, nSamples, nVars,
-                                           pass, a, b, gamma, maxRunTime);
+            ? SVRG_LogisticInnerLoopBatch(w, XtS, y, innerIndices, outerStarts,
+                                          XtTestS, yTest, wtilde, G, lambda,
+                                          maxIter, nSamples, nVars, pass, a, b,
+                                          gamma, maxRunTime, batchSize)
+            : SVRG_LogisticInnerLoopSingle(w, XtS, y, innerIndices, outerStarts,
+                                           XtTestS, yTest, wtilde, G, lambda,
+                                           maxIter, nSamples, nVars, pass, a, b,
+                                           gamma, maxRunTime);
       }
       break;
     default:;

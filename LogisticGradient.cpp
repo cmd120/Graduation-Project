@@ -1,28 +1,49 @@
 #include "include/LogisticGradient.h"
 
-void LogisticGradient(VectorXd &wtilde, VectorXd &G, const MatrixXd &Xt, VectorXd &y){
-    long i,j;
-    int nVars,nSamples;
-    double innerProd;
-    nVars = Xt.rows();
-    nSamples = Xt.cols();
-    VectorXd tmpRes(nSamples);
-    //clear G
-    G = MatrixXd::Zero(nVars,1);
-    if(!SPARSE){
-        tmpRes = Xt.adjoint()*wtilde;
+void LogisticGradient(VectorXd &wtilde, VectorXd &G, const MatrixXd &Xt,
+                      VectorXd &y) {
+  long i, j;
+  int nVars, nSamples;
+  nVars = Xt.rows();
+  nSamples = Xt.cols();
+  VectorXd tmpRes(nSamples);
+  // clear G
+  G = MatrixXd::Zero(nVars, 1);
+  tmpRes = Xt.adjoint() * wtilde;
+  for (i = 0; i < nVars; ++i) {
+    tmpRes(i) = (1.0 / (1 + exp(-tmpRes(i))) - y(i)) / nSamples;
+  }
+  G = Xt * tmpRes;
+  return;
+}
+void LogisticGradient(VectorXd &wtilde, VectorXd &G, int *innerIndices,
+                      int *outerStarts, const SparseMatrix<double> &Xt,
+                      VectorXd &y) {
+  long i, j;
+  int nVars, nSamples;
+  double innerProd;
+  nVars = Xt.rows();
+  nSamples = Xt.cols();
+  VectorXd tmpRes(nSamples);
+  // clear G
+  G = MatrixXd::Zero(nVars, 1);
+  for (i = 0; i < nSamples; ++i) {
+    innerProd = 0;
+    j = outerStarts[i];
+    for (SparseMatrix<double>::InnerIterator it(Xt, i); it; ++it, ++j) {
+      innerProd += wtilde[innerIndices[j]] * it.value();
     }
-    else{
-        ;
+    tmpRes[i] = innerProd;
+  }
+  for (i = 0; i < nVars; ++i) {
+    tmpRes(i) = (1.0 / (1 + exp(-tmpRes(i))) - y(i)) / nSamples;
+  }
+  for (i = 0; i < nSamples; ++i) {
+    innerProd = 0;
+    j = outerStarts[i];
+    for (SparseMatrix<double>::InnerIterator it(Xt, i); it; ++it, ++j) {
+      G[innerIndices[j]] += tmpRes[i] * it.value();
     }
-    for(i=0;i<nVars;++i){
-        tmpRes(i) = (1.0/(1+exp(-tmpRes(i)))-y(i))/nSamples;
-    }
-    if(!SPARSE){
-        G = Xt * tmpRes;
-    }
-    else{
-        ;
-    }
-    return;
+  }
+  return;
 }

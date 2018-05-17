@@ -113,8 +113,8 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
 int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
                                  VectorXd &y, int *innerIndices,
                                  int *outerStarts, SparseMatrix<double> &XtTest,
-                                 VectorXd &yTest, double lambda, VectorXd &d,
-                                 VectorXd &g, long maxIter, int nSamples,
+                                 VectorXd &yTest, VectorXd &wtilde, VectorXd &G,
+                                 double lambda, long maxIter, int nSamples,
                                  int nVars, int pass, double a, double b,
                                  double gamma, int maxRunTime) {
   long i, j, idx;
@@ -141,10 +141,10 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
       for (j = outerStarts[idx]; j < (long)outerStarts[idx + 1]; j++) {
         if (lastVisited[innerIndices[j]] == 0)
           w[innerIndices[j]] +=
-              -d[innerIndices[j]] * cumSum[i - 1] + cumNoise[i - 1];
+              -wtilde[innerIndices[j]] * cumSum[i - 1] + cumNoise[i - 1];
         else
           w[innerIndices[j]] +=
-              -d[innerIndices[j]] *
+              -wtilde[innerIndices[j]] *
                   (cumSum[i - 1] - cumSum[lastVisited[innerIndices[j]] - 1]) +
               cumNoise[i - 1] - cumNoise[lastVisited[innerIndices[j]] - 1];
         lastVisited[innerIndices[j]] = i;
@@ -153,7 +153,7 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
     j = outerStarts[idx];
     for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
       innerProdI += w[innerIndices[j]] * it.value();
-      innerProdZ += d[innerIndices[j]] * it.value();
+      innerProdZ += wtilde[innerIndices[j]] * it.value();
     }
     innerProdI *= c;  // rescale
     tmpDelta = LogisticPartialGradient(innerProdI, 0) -
@@ -183,9 +183,9 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
         (c < 0 && c > -1e-100)) {
       for (j = 0; j < nVars; j++) {
         if (lastVisited[j] == 0)
-          w[j] += -d[j] * cumSum[i] + cumNoise[i];
+          w[j] += -wtilde[j] * cumSum[i] + cumNoise[i];
         else
-          w[j] += -d[j] * (cumSum[i] - cumSum[lastVisited[j] - 1]) +
+          w[j] += -wtilde[j] * (cumSum[i] - cumSum[lastVisited[j] - 1]) +
                   cumNoise[i] - cumNoise[lastVisited[j] - 1];
         lastVisited[j] = i + 1;
       }
@@ -219,9 +219,9 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
   // at last, correct the iterate once more
   for (j = 0; j < nVars; j++) {
     if (lastVisited[j] == 0) {
-      w[j] += -d[j] * cumSum[maxIter - 1] + cumNoise[maxIter - 1];
+      w[j] += -wtilde[j] * cumSum[maxIter - 1] + cumNoise[maxIter - 1];
     } else {
-      w[j] += -d[j] * (cumSum[maxIter - 1] - cumSum[lastVisited[j] - 1]) +
+      w[j] += -wtilde[j] * (cumSum[maxIter - 1] - cumSum[lastVisited[j] - 1]) +
               cumNoise[maxIter - 1] - cumNoise[lastVisited[j] - 1];
     }
   }
@@ -234,8 +234,8 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
 int SVRG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
                                 VectorXd &y, int *innerIndices,
                                 int *outerStarts, SparseMatrix<double> &XtTest,
-                                VectorXd &yTest, double lambda, VectorXd &d,
-                                VectorXd &g, long maxIter, int nSamples,
+                                VectorXd &yTest, VectorXd &wtilde, VectorXd &G,
+                                double lambda, long maxIter, int nSamples,
                                 int nVars, int pass, double a, double b,
                                 double gamma, int maxRunTime, int batchSize) {
   int k;
@@ -268,11 +268,11 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
           if (lastVisited[innerIndices[j]] ==
               0)  // or we can let lastVisited[-1] = 0
             w[innerIndices[j]] +=
-                -d[innerIndices[j]] * cumSum[i - 1] + cumNoise[i - 1];
+                -wtilde[innerIndices[j]] * cumSum[i - 1] + cumNoise[i - 1];
           else if (lastVisited[innerIndices[j]] !=
                    i)  // if lastVisited[innerIndices[j]] > 0 && != i
             w[innerIndices[j]] +=
-                -d[innerIndices[j]] *
+                -wtilde[innerIndices[j]] *
                     (cumSum[i - 1] - cumSum[lastVisited[innerIndices[j]] - 1]) +
                 cumNoise[i - 1] - cumNoise[lastVisited[innerIndices[j]] - 1];
           lastVisited[innerIndices[j]] = i;
@@ -285,7 +285,7 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
       j = outerStarts[idx];
       for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
         innerProdI += w[innerIndices[j]] * it.value();
-        innerProdZ += d[innerIndices[j]] * it.value();
+        innerProdZ += wtilde[innerIndices[j]] * it.value();
       }
       innerProdI *= c;  // rescale
       gradBuffer[k] = LogisticPartialGradient(innerProdI, 0) -
@@ -312,14 +312,14 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
       // @NOTE (int *) here is 64bit because mwIndex is 64bit, and we have to
       // link libmkl_intel_ilp64.a for 64bit integer
     }
-    /* Step 4: update d and g[idx] */
+    /* Step 4: update wtilde and G[idx] */
     for (k = 0; k < batchSize; k++) {
       idx = sampleBuffer[k];
       j = outerStarts[idx];
       for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
-        d[innerIndices[j]] += it.value() * (gradBuffer[k] - g[idx]);
+        wtilde[innerIndices[j]] += it.value() * (gradBuffer[k] - G[idx]);
       }
-      g[idx] = gradBuffer[k];
+      G[idx] = gradBuffer[k];
     }
     // Re-normalize the parameter vector if it has gone numerically crazy
     if (((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) ||
@@ -327,9 +327,9 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
         (c < 0 && c > -1e-100)) {
       for (j = 0; j < nVars; j++) {
         if (lastVisited[j] == 0)
-          w[j] += -d[j] * cumSum[i] + cumNoise[i];
+          w[j] += -wtilde[j] * cumSum[i] + cumNoise[i];
         else
-          w[j] += -d[j] * (cumSum[i] - cumSum[lastVisited[j] - 1]) +
+          w[j] += -wtilde[j] * (cumSum[i] - cumSum[lastVisited[j] - 1]) +
                   cumNoise[i] - cumNoise[lastVisited[j] - 1];
         lastVisited[j] = i + 1;
       }
@@ -364,9 +364,9 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
   // at last, correct the iterate once more
   for (j = 0; j < nVars; j++) {
     if (lastVisited[j] == 0)
-      w[j] += -d[j] * cumSum[maxIter - 1] + cumNoise[maxIter - 1];
+      w[j] += -wtilde[j] * cumSum[maxIter - 1] + cumNoise[maxIter - 1];
     else
-      w[j] += -d[j] * (cumSum[maxIter - 1] - cumSum[lastVisited[j] - 1]) +
+      w[j] += -wtilde[j] * (cumSum[maxIter - 1] - cumSum[lastVisited[j] - 1]) +
               cumNoise[maxIter - 1] - cumNoise[lastVisited[j] - 1];
   }
   w = c * w;
