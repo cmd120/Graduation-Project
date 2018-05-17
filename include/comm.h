@@ -23,11 +23,11 @@ typedef enum {
 #include <string>
 #include <vector>
 
+#include "DenseMat.h"
 #include "Eigen/Dense"
 #include "Eigen/Sparse"
 #include "LogisticGradient.h"
 #include "Noise.h"
-#include "DenseMat.h"
 #include "SparseMat.h"
 
 class LR {
@@ -37,7 +37,8 @@ class LR {
   double mu = 0;
   double optSolution;
   double optConst;
-  void sigfunc(VectorXd &w, MatrixXd &X, VectorXd &y, VectorXd &sigmoid) {
+  void sigfunc(Eigen::VectorXd &w, Eigen::MatrixXd &X, Eigen::VectorXd &y,
+               Eigen::VectorXd &sigmoid) {
     sigmoid = (1 + (-X.adjoint() * w).array().exp()).cwiseInverse();
   }
 
@@ -47,19 +48,20 @@ class LR {
     this->L = L;
     this->mu = mu;
   }
-  double costfunc(VectorXd &w, MatrixXd &X, VectorXd &y) {
-    VectorXd sigmoid;
+  double costfunc(Eigen::VectorXd &w, Eigen::MatrixXd &X, Eigen::VectorXd &y) {
+    Eigen::VectorXd sigmoid;
     sigfunc(w, X, y, sigmoid);
-    VectorXd siglog = sigmoid.array().log();
-    VectorXd siglogimpl = (1 - sigmoid.array()).log();
+    Eigen::VectorXd siglog = sigmoid.array().log();
+    Eigen::VectorXd siglogimpl = (1 - sigmoid.array()).log();
     // mean maybe wrong here
     double loss =
         -(y.dot(siglog) + (1 - y.array()) * siglogimpl.array()).mean();
     double regularizer = this->lambda / 2 * (w.array().square()).sum();
     return loss + regularizer;
   }
-  double loglikelihood(VectorXd &w, MatrixXd &X, VectorXd &y) {
-    VectorXd sigmoid;
+  double loglikelihood(Eigen::VectorXd &w, Eigen::MatrixXd &X,
+                       Eigen::VectorXd &y) {
+    Eigen::VectorXd sigmoid;
     sigfunc(w, X, y, sigmoid);
     // mean may be wrong here
     double loglikelihood = (y.array() * sigmoid.array().log() +
@@ -67,43 +69,47 @@ class LR {
                                .mean();
     return loglikelihood;
   }
-  VectorXd grad_noreg(VectorXd &w, MatrixXd &X, VectorXd &y) {
+  Eigen::VectorXd grad_noreg(Eigen::VectorXd &w, Eigen::MatrixXd &X,
+                             Eigen::VectorXd &y) {
     int d = X.rows(), n = X.cols();
-    VectorXd tmpExp = (-(X.adjoint() * w)).array().exp();
-    VectorXd gradient =
+    Eigen::VectorXd tmpExp = (-(X.adjoint() * w)).array().exp();
+    Eigen::VectorXd gradient =
         X * (1 + tmpExp.array() - y.array()).matrix().cwiseInverse() / n;
     return gradient;
   }
-  void hypothesis(VectorXd &w, MatrixXd &X, VectorXd &hypothesis) {
+  void hypothesis(Eigen::VectorXd &w, Eigen::MatrixXd &X,
+                  Eigen::VectorXd &hypothesis) {
     hypothesis = 1 / (1 + (-X.adjoint() * w).array().exp().array());
   }
-  void costprint(VectorXd &w, MatrixXd &X, VectorXd &y, int stage) {
+  void costprint(Eigen::VectorXd &w, Eigen::MatrixXd &X, Eigen::VectorXd &y,
+                 int stage) {
     double cost = costfunc(w, X, y);
     double grad_square = (grad_noreg(w, X, y) + lambda * w).norm();
     // fprintf('epoch: %4d, cost: %.25f, grad: %.25f\n', stage, cost,
     // grad_square);
     // fprintf('epoch: %4d, cost: %.25f\n', stage, cost);  // resize the cost
   }
-  void predictfunc(VectorXd &w, MatrixXd &X, VectorXd &labels) {
+  void predictfunc(Eigen::VectorXd &w, Eigen::MatrixXd &X,
+                   Eigen::VectorXd &labels) {
     int n = X.cols();
-    VectorXd y;
+    Eigen::VectorXd y;
     hypothesis(w, X, y);
-    labels = VectorXd::Ones(n);
+    labels = Eigen::VectorXd::Ones(n);
     for (int i = 0; i < n; i++) {
       if (y(i) < 0.5) labels(i) = 0;
     }
   }
-  double score(VectorXd &w, MatrixXd &X, VectorXd &y) {
+  double score(Eigen::VectorXd &w, Eigen::MatrixXd &X, Eigen::VectorXd &y) {
     int n = X.cols();
     double score = 0;
-    VectorXd labels;
+    Eigen::VectorXd labels;
     predictfunc(w, X, labels);
     for (int i = 0; i < n; i++) {
       if (labels[i] == y[i]) score += 1;
     }
     if (DEBUG) {
-      cout << "score: " << score << endl;
-      cout << "n: " << n << endl;
+      std::cout << "score: " << score << std::endl;
+      std::cout << "n: " << n << std::endl;
     }
     return score / n;
   }
@@ -123,52 +129,57 @@ class RR {
     this->L = L;
     this->mu = mu;
   }
-  double costfunc(VectorXd &w, MatrixXd &X, VectorXd &y) {
-    VectorXd sigmoid;
+  double costfunc(Eigen::VectorXd &w, Eigen::MatrixXd &X, Eigen::VectorXd &y) {
+    Eigen::VectorXd sigmoid;
     double loss = (y - X.adjoint() * w).array().square().mean() / 2;
     double regularizer = this->lambda / 2 * (w.array().square()).sum();
     return loss + regularizer;
   }
-  double loglikelihood(VectorXd &w, MatrixXd &X, VectorXd &y) {
-    VectorXd innerProd;
+  double loglikelihood(Eigen::VectorXd &w, Eigen::MatrixXd &X,
+                       Eigen::VectorXd &y) {
+    Eigen::VectorXd innerProd;
     innerProd = X.adjoint() * w;
     double loglikelihood = 1 / 2 * (innerProd - y).array().square().mean();
     return loglikelihood;
   }
-  VectorXd grad_noreg(VectorXd &w, MatrixXd &X, VectorXd &y) {
+  Eigen::VectorXd grad_noreg(Eigen::VectorXd &w, Eigen::MatrixXd &X,
+                             Eigen::VectorXd &y) {
     int d = X.rows(), n = X.cols();
-    VectorXd gradient = 1 / n * (X * (X.adjoint() * w - y));
+    Eigen::VectorXd gradient = 1 / n * (X * (X.adjoint() * w - y));
   }
-  void hypothesis(VectorXd &w, MatrixXd &X, VectorXd &hypothesis) {
+  void hypothesis(Eigen::VectorXd &w, Eigen::MatrixXd &X,
+                  Eigen::VectorXd &hypothesis) {
     hypothesis = X.adjoint() * w;
   }
-  void costprint(VectorXd &w, MatrixXd &X, VectorXd &y, int stage) {
+  void costprint(Eigen::VectorXd &w, Eigen::MatrixXd &X, Eigen::VectorXd &y,
+                 int stage) {
     double cost = costfunc(w, X, y);
     double grad_square = (grad_noreg(w, X, y) + this->lambda * w).norm();
     // fprintf('epoch: %4d, cost: %.25f, grad: %.25f\n', stage, cost,
     // grad_square);
     // fprintf('epoch: %4d, cost: %.25f\n', stage, cost);  // resize the cost
   }
-  void predictfunc(VectorXd &w, MatrixXd &X, VectorXd &labels) {
+  void predictfunc(Eigen::VectorXd &w, Eigen::MatrixXd &X,
+                   Eigen::VectorXd &labels) {
     int n = X.cols();
-    VectorXd y;
+    Eigen::VectorXd y;
     hypothesis(w, X, y);
-    labels = VectorXd::Ones(n);
+    labels = Eigen::VectorXd::Ones(n);
     for (int i = 0; i < n; i++) {
       if (y(i) < 0) labels(i) = 0;
     }
   }
-  double score(VectorXd &w, MatrixXd &X, VectorXd &y) {
+  double score(Eigen::VectorXd &w, Eigen::MatrixXd &X, Eigen::VectorXd &y) {
     int n = X.cols();
     double score = 0;
-    VectorXd labels;
+    Eigen::VectorXd labels;
     predictfunc(w, X, labels);
     for (int i = 0; i < n; i++) {
       if (labels[i] == y[i]) score += 1;
     }
     if (DEBUG) {
-      cout << "score: " << score << endl;
-      cout << "n: " << n << endl;
+      std::cout << "score: " << score << std::endl;
+      std::cout << "n: " << n << std::endl;
     }
     return score / n;
   }

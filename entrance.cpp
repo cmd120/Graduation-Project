@@ -15,22 +15,23 @@ int SPARSE;
 LR objFuncLR;
 RR objFuncRR;
 int LogisticEntrance(int algorithmType, int datasetNum,
-                     SparseMatrix<double> &XtS, VectorXd &y,
-                     SparseMatrix<double> &XtTestS, VectorXd &yTest) {
-  VectorXd w, wtilde, G, sumIG, gradients;
+                     Eigen::SparseMatrix<double> &XtS, Eigen::VectorXd &y,
+                     Eigen::SparseMatrix<double> &XtTestS,
+                     Eigen::VectorXd &yTest) {
+  Eigen::VectorXd w, wtilde, G, sumIG, gradients;
   double lambda, eta, a, b, gamma;
   int maxIter, batchSize, passes, maxRunTime;
   SPARSE = 0;
   int nVars, nSamples, flag;
-  string filename;
+  std::string filename;
   int *innerIndices, *outerStarts;
   innerIndices = XtS.innerIndexPtr();
   outerStarts = new int[XtS.cols()];
   if (!outerStarts) {
-    cout << "run out of space!" << endl;
+    std::cout << "run out of space!" << std::endl;
   }
   InitOuterStarts(XtS, outerStarts);
-  w = MatrixXd::Zero(XtS.rows(), 1);
+  w = Eigen::MatrixXd::Zero(XtS.rows(), 1);
   wtilde = w;
   G = w;
   gradients = (1 + (-XtS.adjoint() * w).array().exp()).inverse() - y.array();
@@ -148,29 +149,31 @@ int LogisticEntrance(int algorithmType, int datasetNum,
     default:;
   }
   if (DEBUG) {
-    cout << "hypothesis: " << 1 / (1 + (-XtTestS.adjoint() * w).array().exp())
-         << endl;
+    std::cout << "hypothesis: "
+              << 1 / (1 + (-XtTestS.adjoint() * w).array().exp()) << std::endl;
   }
-  MatrixXd tmpXt = MatrixXd(XtS), tmpXtTest = MatrixXd(XtTestS);
+  Eigen::MatrixXd tmpXt = Eigen::MatrixXd(XtS),
+                  tmpXtTest = Eigen::MatrixXd(XtTestS);
   auto endTime = Clock::now();
-  printf(
-      "telapsed %f\n",
-      chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count() /
-          BILLION);
+  printf("telapsed %f\n", std::chrono::duration_cast<std::chrono::nanoseconds>(
+                              endTime - startTime)
+                                  .count() /
+                              BILLION);
   printf("training accuracy: %f\n", objFuncLR.score(w, tmpXt, y));
   printf("test accuracy: %f\n", objFuncLR.score(w, tmpXtTest, yTest));
   // fprintf('time elapsed: %f\n', telapsed);
   return 0;
 }
-int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
-                     VectorXd &y, MatrixXd &XtTest, VectorXd &yTest) {
-  VectorXd w, wtilde, G, sumIG, gradients;
+int LogisticEntrance(int algorithmType, int datasetNum, Eigen::MatrixXd &Xt,
+                     Eigen::VectorXd &y, Eigen::MatrixXd &XtTest,
+                     Eigen::VectorXd &yTest) {
+  Eigen::VectorXd w, wtilde, G, sumIG, gradients;
   double lambda, eta, a, b, gamma;
   int maxIter, batchSize, passes, maxRunTime;
   SPARSE = 0;
   int nVars, nSamples, flag;
-  string filename;
-  w = MatrixXd::Zero(Xt.rows(), 1);
+  std::string filename;
+  w = Eigen::MatrixXd::Zero(Xt.rows(), 1);
   wtilde = w;
   G = w;
   gradients = (1 + (-Xt.adjoint() * w).array().exp()).inverse() - y.array();
@@ -282,17 +285,17 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
     default:;
   }
   if (DEBUG) {
-    // cout << "Xt'*w: " << XtTest.adjoint() * w << endl;
-    // cout << "yTest: " << yTest << endl;
-    // cout << "w:" << w << endl;
-    cout << "hypothesis: " << 1 / (1 + (-XtTest.adjoint() * w).array().exp())
-         << endl;
+    // std::cout << "Xt'*w: " << XtTest.adjoint() * w << std::endl;
+    // std::cout << "yTest: " << yTest << std::endl;
+    // std::cout << "w:" << w << std::endl;
+    std::cout << "hypothesis: "
+              << 1 / (1 + (-XtTest.adjoint() * w).array().exp()) << std::endl;
   }
   auto endTime = Clock::now();
-  printf(
-      "telapsed %f\n",
-      chrono::duration_cast<chrono::nanoseconds>(endTime - startTime).count() /
-          BILLION);
+  printf("telapsed %f\n", std::chrono::duration_cast<std::chrono::nanoseconds>(
+                              endTime - startTime)
+                                  .count() /
+                              BILLION);
   printf("training accuracy: %f\n", objFuncLR.score(w, Xt, y));
   printf("test accuracy: %f\n", objFuncLR.score(w, XtTest, yTest));
   // fprintf('time elapsed: %f\n', telapsed);
@@ -301,36 +304,38 @@ int LogisticEntrance(int algorithmType, int datasetNum, MatrixXd &Xt,
 
 void datasetOption(int &datasetNum) {
   const int NUMBEROFDATASET = 2;
-  const string datasets[NUMBEROFDATASET] = {"MNIST", "COVTYPE"};
-  cout << "Available datasets to choose from:" << endl;
+  const std::string datasets[NUMBEROFDATASET] = {"MNIST", "COVTYPE"};
+  std::cout << "Available datasets to choose from:" << std::endl;
   for (int i = 0; i < NUMBEROFDATASET; ++i) {
-    cout << i + 1 << "." << datasets[i] << endl;
+    std::cout << i + 1 << "." << datasets[i] << std::endl;
   }
-  cout << "Enter your choice of dataset: " << endl;
-  cin >> datasetNum;
-  cout << "Your choice of dataset: " << datasets[datasetNum - 1] << endl;
+  std::cout << "Enter your choice of dataset: " << std::endl;
+  std::cin >> datasetNum;
+  std::cout << "Your choice of dataset: " << datasets[datasetNum - 1]
+            << std::endl;
   return;
 }
 void algorithmOption(int &algorithmType) {
   const int NUMBEROFAlGORITHM = 7;
-  const string algorithms[NUMBEROFAlGORITHM] = {"IAG", "IAGA", "SAG", "SAGA",
+  const std::string algorithms[NUMBEROFAlGORITHM] = {"IAG", "IAGA", "SAG", "SAGA",
                                                 "SGD", "SIG",  "SVRG"};
-  cout << "Enter your choice of algorithm: (0 to quit)" << endl;
+  std::cout << "Enter your choice of algorithm: (0 to quit)" << std::endl;
   for (int i = 0; i < NUMBEROFAlGORITHM; ++i) {
-    cout << i + 1 << "." << algorithms[i] << endl;
+    std::cout << i + 1 << "." << algorithms[i] << std::endl;
   }
   while (1) {
-    if (cin >> algorithmType) {
+    if (std::cin >> algorithmType) {
       if (algorithmType)
-        cout << "Your choice of algorithm: " << algorithms[algorithmType - 1]
-             << endl;
+        std::cout << "Your choice of algorithm: "
+                  << algorithms[algorithmType - 1] << std::endl;
       else
-        cout << "Bye" << endl;
+        std::cout << "Bye" << std::endl;
       break;
     } else {
-      cout << "Invalid Input! Please intput a numerical value." << endl;
-      cin.clear();
-      while (cin.get() != '\n')
+      std::cout << "Invalid Input! Please intput a numerical value."
+                << std::endl;
+      std::cin.clear();
+      while (std::cin.get() != '\n')
         ;
     }
   }
@@ -338,9 +343,9 @@ void algorithmOption(int &algorithmType) {
 }
 
 int main(int argc, char *argv[]) {
-  MatrixXd Xt, XtTest;
-  SparseMatrix<double> XtS, XtTestS;
-  VectorXd y, yTest;
+  Eigen::MatrixXd Xt, XtTest;
+  Eigen::SparseMatrix<double> XtS, XtTestS;
+  Eigen::VectorXd y, yTest;
   int algorithmType = 0, datasetNum;
 
   datasetOption(datasetNum);
@@ -352,13 +357,13 @@ int main(int argc, char *argv[]) {
       covtype_read(Xt, y, XtTest, yTest);
       break;
   }
-  cout << "dataset loaded." << endl;
+  std::cout << "dataset loaded." << std::endl;
   if (SPARSE) {
     XtS = Xt.sparseView();
     XtTestS = XtTest.sparseView();
-    cout << "dataset is sparse" << endl;
+    std::cout << "dataset is sparse" << std::endl;
   } else {
-    cout << "dataset is dense" << endl;
+    std::cout << "dataset is dense" << std::endl;
   }
   while (1) {
     algorithmOption(algorithmType);

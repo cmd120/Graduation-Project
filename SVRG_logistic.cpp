@@ -19,12 +19,14 @@ SVRG_logistic(w,Xt,y,lambda,eta,wtilde,G);
 % maxRunTime
 % filename - saving results
 */
-int SVRG_LogisticInnerLoopSingle(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
-                                 const MatrixXd &XtTest, VectorXd &yTest,
-                                 VectorXd &wtilde, VectorXd &G, double lambda,
-                                 long maxIter, int nSamples, int nVars,
-                                 int pass, double a, double b, double gamma,
-                                 int maxRunTime) {
+int SVRG_LogisticInnerLoopSingle(Eigen::VectorXd &w, const Eigen::MatrixXd &Xt,
+                                 Eigen::VectorXd &y,
+                                 const Eigen::MatrixXd &XtTest,
+                                 Eigen::VectorXd &yTest,
+                                 Eigen::VectorXd &wtilde, Eigen::VectorXd &G,
+                                 double lambda, long maxIter, int nSamples,
+                                 int nVars, int pass, double a, double b,
+                                 double gamma, int maxRunTime) {
   long i, idx, j;
   double innerProdI = 0, innerProdZ = 0, tmpDelta, eta, telapsed;
   auto endTime = Clock::now();
@@ -45,7 +47,8 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
     // compute error
     if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
       endTime = Clock::now();
-      telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime - startTime)
+      telapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime -
+                                                                      startTime)
                      .count() /
                  BILLION;
       LogisticError(w, XtTest, yTest, pass + (i + 1) * 1.0 / maxIter, telapsed,
@@ -59,16 +62,18 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
   return 0;
 }
 
-int SVRG_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
-                                const MatrixXd &XtTest, VectorXd &yTest,
-                                VectorXd &wtilde, VectorXd &G, double lambda,
-                                long maxIter, int nSamples, int nVars, int pass,
-                                double a, double b, double gamma,
-                                int maxRunTime, int batchSize) {
+int SVRG_LogisticInnerLoopBatch(Eigen::VectorXd &w, const Eigen::MatrixXd &Xt,
+                                Eigen::VectorXd &y,
+                                const Eigen::MatrixXd &XtTest,
+                                Eigen::VectorXd &yTest, Eigen::VectorXd &wtilde,
+                                Eigen::VectorXd &G, double lambda, long maxIter,
+                                int nSamples, int nVars, int pass, double a,
+                                double b, double gamma, int maxRunTime,
+                                int batchSize) {
   long i, idx, j, k;
   double innerProdI = 0, innerProdZ = 0, eta, telapsed;
   auto endTime = Clock::now();
-  VectorXd gradBuffer(batchSize);
+  Eigen::VectorXd gradBuffer(batchSize);
   int *sampleBuffer = new int[batchSize];
   Noise idxSample(0, nSamples - 1);
   for (i = 0; i < maxIter; i++) {
@@ -95,7 +100,8 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
     // compute error
     if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
       endTime = Clock::now();
-      telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime - startTime)
+      telapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime -
+                                                                      startTime)
                      .count() /
                  BILLION;
       LogisticError(w, XtTest, yTest, pass + (i + 1) * 1.0 / maxIter, telapsed,
@@ -110,13 +116,12 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt, VectorXd &y,
   delete[] sampleBuffer;
   return 0;
 }
-int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
-                                 VectorXd &y, int *innerIndices,
-                                 int *outerStarts, SparseMatrix<double> &XtTest,
-                                 VectorXd &yTest, VectorXd &wtilde, VectorXd &G,
-                                 double lambda, long maxIter, int nSamples,
-                                 int nVars, int pass, double a, double b,
-                                 double gamma, int maxRunTime) {
+int SVRG_LogisticInnerLoopSingle(
+    Eigen::VectorXd &w, Eigen::SparseMatrix<double> &Xt, Eigen::VectorXd &y,
+    int *innerIndices, int *outerStarts, Eigen::SparseMatrix<double> &XtTest,
+    Eigen::VectorXd &yTest, Eigen::VectorXd &wtilde, Eigen::VectorXd &G,
+    double lambda, long maxIter, int nSamples, int nVars, int pass, double a,
+    double b, double gamma, int maxRunTime) {
   long i, j, idx;
   double innerProdI = 0, innerProdZ = 0, tmpDelta, tmpFactor, eta, telapsed;
   double c = 1;
@@ -151,7 +156,8 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
       }
     }
     j = outerStarts[idx];
-    for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
+    for (Eigen::SparseMatrix<double>::InnerIterator it(Xt, idx); it;
+         ++it, ++j) {
       innerProdI += w[innerIndices[j]] * it.value();
       innerProdZ += wtilde[innerIndices[j]] * it.value();
     }
@@ -194,10 +200,10 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
           maxIter * epochCounter / PRINT_FREQ)  // print test error
       {
         endTime = Clock::now();
-        telapsed =
-            chrono::duration_cast<chrono::nanoseconds>(endTime - startTime)
-                .count() /
-            BILLION;
+        telapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       endTime - startTime)
+                       .count() /
+                   BILLION;
         LogisticError(w, XtTest, yTest, pass + (i + 1) * 1.0 / maxIter,
                       telapsed, fp);
         epochCounter = (epochCounter + 1) % PRINT_FREQ;
@@ -226,13 +232,12 @@ int SVRG_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
   delete[] cumNoise;
   return 0;
 }
-int SVRG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
-                                VectorXd &y, int *innerIndices,
-                                int *outerStarts, SparseMatrix<double> &XtTest,
-                                VectorXd &yTest, VectorXd &wtilde, VectorXd &G,
-                                double lambda, long maxIter, int nSamples,
-                                int nVars, int pass, double a, double b,
-                                double gamma, int maxRunTime, int batchSize) {
+int SVRG_LogisticInnerLoopBatch(
+    Eigen::VectorXd &w, Eigen::SparseMatrix<double> &Xt, Eigen::VectorXd &y,
+    int *innerIndices, int *outerStarts, Eigen::SparseMatrix<double> &XtTest,
+    Eigen::VectorXd &yTest, Eigen::VectorXd &wtilde, Eigen::VectorXd &G,
+    double lambda, long maxIter, int nSamples, int nVars, int pass, double a,
+    double b, double gamma, int maxRunTime, int batchSize) {
   int k;
   long i, idx, j;
   double innerProdI = 0, innerProdZ = 0, c = 1, tmpFactor, eta, telapsed;
@@ -278,7 +283,8 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
     for (k = 0; k < batchSize; k++) {
       idx = sampleBuffer[k];
       j = outerStarts[idx];
-      for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
+      for (Eigen::SparseMatrix<double>::InnerIterator it(Xt, idx); it;
+           ++it, ++j) {
         innerProdI += w[innerIndices[j]] * it.value();
         innerProdZ += wtilde[innerIndices[j]] * it.value();
       }
@@ -330,10 +336,10 @@ int SVRG_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
           maxIter * epochCounter / PRINT_FREQ)  // print test error
       {
         endTime = Clock::now();
-        telapsed =
-            chrono::duration_cast<chrono::nanoseconds>(endTime - startTime)
-                .count() /
-            BILLION;
+        telapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       endTime - startTime)
+                       .count() /
+                   BILLION;
         LogisticError(w, XtTest, yTest, pass + (i + 1) * 1.0 / maxIter,
                       telapsed, fp);
         epochCounter = (epochCounter + 1) % PRINT_FREQ;

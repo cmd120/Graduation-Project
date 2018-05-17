@@ -4,12 +4,12 @@
 #include <sstream>
 #include "SparseMat.h"
 #include "comm.h"
-using namespace std;
 
 const int trainSetSize = 100;
 const int testSetSize = 20;
-void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest, VectorXd &yTest);
-// void covtype_binary_read(SparseMatrix<double> &Xt, VectorXd &y, int setSize,
-// string full_path="covtype.libsvm.binary"/*, SparseMatrix<double> &XtTest,
-// VectorXd &yTest*/);
+void covtype_read(Eigen::MatrixXd &Xt, Eigen::VectorXd &y,
+                  Eigen::MatrixXd &XtTest, Eigen::VectorXd &yTest);
+// void covtype_binary_read(Eigen::SparseMatrix<double> &Xt, Eigen::VectorXd &y,
+// int setSize, string full_path="covtype.libsvm.binary"/*,
+// Eigen::SparseMatrix<double> &XtTest, Eigen::VectorXd &yTest*/);
 #endif

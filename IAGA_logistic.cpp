@@ -16,12 +16,11 @@ iterations % batchSize - mini-batch size m % pass - used to determine #iteration
 % maxRunTime
 % filename - saving results
 */
-int IAGA_LogisticInnerLoopSingle(VectorXd &w, const MatrixXd &Xt,
-                                 const VectorXd &y, const MatrixXd &XtTest,
-                                 VectorXd &yTest, VectorXd &d, VectorXd &g,
-                                 double lambda, long maxIter, int nSamples,
-                                 int nVars, int pass, double a, double b,
-                                 double gamma, int maxRunTime) {
+int IAGA_LogisticInnerLoopSingle(
+    Eigen::VectorXd &w, const Eigen::MatrixXd &Xt, const Eigen::VectorXd &y,
+    const Eigen::MatrixXd &XtTest, Eigen::VectorXd &yTest, Eigen::VectorXd &d,
+    Eigen::VectorXd &g, double lambda, long maxIter, int nSamples, int nVars,
+    int pass, double a, double b, double gamma, int maxRunTime) {
   long i, idx, j;
   double innerProd = 0, tmpDelta, eta, telapsed;
   auto endTime = Clock::now();
@@ -39,30 +38,30 @@ int IAGA_LogisticInnerLoopSingle(VectorXd &w, const MatrixXd &Xt,
     // compute error
     if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
       endTime = Clock::now();
-      telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime - startTime)
+      telapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime -
+                                                                      startTime)
                      .count() /
                  BILLION;
       LogisticError(w, XtTest, yTest, pass + (i + 1) * 1.0 / maxIter, telapsed,
                     fp);
       epochCounter = (epochCounter + 1) % PRINT_FREQ;
       if (telapsed >= maxRunTime) {
-        cout << "total telapsed: " << telapsed << endl;
+        std::cout << "total telapsed: " << telapsed << std::endl;
         return 1;
       }
     }
   }
   return 0;
 }
-int IAGA_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt,
-                                const VectorXd &y, const MatrixXd &XtTest,
-                                VectorXd &yTest, VectorXd &d, VectorXd &g,
-                                double lambda, long maxIter, int nSamples,
-                                int nVars, int pass, double a, double b,
-                                double gamma, int maxRunTime, int batchSize) {
+int IAGA_LogisticInnerLoopBatch(
+    Eigen::VectorXd &w, const Eigen::MatrixXd &Xt, const Eigen::VectorXd &y,
+    const Eigen::MatrixXd &XtTest, Eigen::VectorXd &yTest, Eigen::VectorXd &d,
+    Eigen::VectorXd &g, double lambda, long maxIter, int nSamples, int nVars,
+    int pass, double a, double b, double gamma, int maxRunTime, int batchSize) {
   long i, idx, j, k;
   double innerProd, eta, telapsed;
   auto endTime = Clock::now();
-  VectorXd gradBuffer(batchSize);
+  Eigen::VectorXd gradBuffer(batchSize);
   int *sampleBuffer = new int[batchSize];
   for (i = 0; i < maxIter; i++) {
     eta = a * pow(b + i + 1, -gamma);
@@ -87,7 +86,8 @@ int IAGA_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt,
     // compute error
     if ((i + 1) % maxIter == maxIter * epochCounter / PRINT_FREQ) {
       endTime = Clock::now();
-      telapsed = chrono::duration_cast<chrono::nanoseconds>(endTime - startTime)
+      telapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime -
+                                                                      startTime)
                      .count() /
                  BILLION;
       LogisticError(w, XtTest, yTest, pass + (i + 1) * 1.0 / maxIter, telapsed,
@@ -103,13 +103,12 @@ int IAGA_LogisticInnerLoopBatch(VectorXd &w, const MatrixXd &Xt,
   return 0;
 }
 
-int IAGA_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
-                                 VectorXd &y, int *innerIndices,
-                                 int *outerStarts, SparseMatrix<double> &XtTest,
-                                 VectorXd &yTest, double lambda, VectorXd &d,
-                                 VectorXd &g, long maxIter, int nSamples,
-                                 int nVars, int pass, double a, double b,
-                                 double gamma, int maxRunTime) {
+int IAGA_LogisticInnerLoopSingle(
+    Eigen::VectorXd &w, Eigen::SparseMatrix<double> &Xt, Eigen::VectorXd &y,
+    int *innerIndices, int *outerStarts, Eigen::SparseMatrix<double> &XtTest,
+    Eigen::VectorXd &yTest, double lambda, Eigen::VectorXd &d,
+    Eigen::VectorXd &g, long maxIter, int nSamples, int nVars, int pass,
+    double a, double b, double gamma, int maxRunTime) {
   long i, j, idx;
   double innerProd, tmpGrad, tmpFactor, eta, telapsed;
   double c = 1;
@@ -145,7 +144,8 @@ int IAGA_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
     }
     innerProd = 0;
     j = outerStarts[idx];
-    for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
+    for (Eigen::SparseMatrix<double>::InnerIterator it(Xt, idx); it;
+         ++it, ++j) {
       innerProd += w[innerIndices[j]] * it.value();
     }
     innerProd *= c;  // rescale
@@ -167,10 +167,11 @@ int IAGA_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
     // cblas_daxpyi(outerStarts[idx + 1] - outerStarts[idx], -tmpFactor, Xt +
     // outerStarts[idx], (int *)(innerIndices + outerStarts[idx]), w);
     // @NOTE (int *) here is 64bit because mwIndex is 64bit, and we have to link
-    // libmkl_intel_ilp64.a for 64bit integer cout << "pass 5" << endl; Step 4:
-    // update d and g(idx)
+    // libmkl_intel_ilp64.a for 64bit integer std::cout << "pass 5" <<
+    // std::endl; Step 4: update d and g(idx)
     j = outerStarts[idx];
-    for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
+    for (Eigen::SparseMatrix<double>::InnerIterator it(Xt, idx); it;
+         ++it, ++j) {
       d[innerIndices[j]] += it.value() * (tmpGrad - g[idx]);
     }
     g[idx] = tmpGrad;
@@ -196,10 +197,10 @@ int IAGA_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
           maxIter * epochCounter / PRINT_FREQ)  // print test error
       {
         endTime = Clock::now();
-        telapsed =
-            chrono::duration_cast<chrono::nanoseconds>(endTime - startTime)
-                .count() /
-            BILLION;
+        telapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       endTime - startTime)
+                       .count() /
+                   BILLION;
         LogisticError(w, XtTest, yTest, pass + (i + 1) * 1.0 / maxIter,
                       telapsed, fp);
         epochCounter = (epochCounter + 1) % PRINT_FREQ;
@@ -228,13 +229,12 @@ int IAGA_LogisticInnerLoopSingle(VectorXd &w, SparseMatrix<double> &Xt,
   delete[] cumNoise;
   return 0;
 }
-int IAGA_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
-                                VectorXd &y, int *innerIndices,
-                                int *outerStarts, SparseMatrix<double> &XtTest,
-                                VectorXd &yTest, double lambda, VectorXd &d,
-                                VectorXd &g, long maxIter, int nSamples,
-                                int nVars, int pass, double a, double b,
-                                double gamma, int maxRunTime, int batchSize) {
+int IAGA_LogisticInnerLoopBatch(
+    Eigen::VectorXd &w, Eigen::SparseMatrix<double> &Xt, Eigen::VectorXd &y,
+    int *innerIndices, int *outerStarts, Eigen::SparseMatrix<double> &XtTest,
+    Eigen::VectorXd &yTest, double lambda, Eigen::VectorXd &d,
+    Eigen::VectorXd &g, long maxIter, int nSamples, int nVars, int pass,
+    double a, double b, double gamma, int maxRunTime, int batchSize) {
   int k;
   long i, idx, j;
   double innerProd, c = 1, tmpFactor, eta, telapsed;
@@ -281,7 +281,8 @@ int IAGA_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
       idx = sampleBuffer[k];
       innerProd = 0;
       j = outerStarts[idx];
-      for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
+      for (Eigen::SparseMatrix<double>::InnerIterator it(Xt, idx); it;
+           ++it, ++j) {
         innerProd += w[innerIndices[j]] * it.value();
       }
       innerProd *= c;  // rescale
@@ -312,7 +313,8 @@ int IAGA_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
     for (k = 0; k < batchSize; k++) {
       idx = sampleBuffer[k];
       j = outerStarts[idx];
-      for (SparseMatrix<double>::InnerIterator it(Xt, idx); it; ++it, ++j) {
+      for (Eigen::SparseMatrix<double>::InnerIterator it(Xt, idx); it;
+           ++it, ++j) {
         d[innerIndices[j]] += it.value() * (gradBuffer[k] - g[idx]);
       }
       g[idx] = gradBuffer[k];
@@ -339,10 +341,10 @@ int IAGA_LogisticInnerLoopBatch(VectorXd &w, SparseMatrix<double> &Xt,
           maxIter * epochCounter / PRINT_FREQ)  // print test error
       {
         endTime = Clock::now();
-        telapsed =
-            chrono::duration_cast<chrono::nanoseconds>(endTime - startTime)
-                .count() /
-            BILLION;
+        telapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       endTime - startTime)
+                       .count() /
+                   BILLION;
         LogisticError(w, XtTest, yTest, pass + (i + 1) * 1.0 / maxIter,
                       telapsed, fp);
         epochCounter = (epochCounter + 1) % PRINT_FREQ;

@@ -1,16 +1,16 @@
 #include "include/covtype.h"
-
+using namespace Eigen;
 void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest,
                   VectorXd &yTest) {
-  ifstream file;
-  string line, num;
-  string full_path = "covtype.data";
-  vector<double> fulldata, covtype_dataset, covtype_labels;
+  std::ifstream file;
+  std::string line, num;
+  std::string full_path = "covtype.data";
+  std::vector<double> fulldata, covtype_dataset, covtype_labels;
   fulldata.reserve(40000000);
   file.open(full_path);
   if (file.is_open()) {
     while (getline(file, line)) {
-      istringstream linestream(line);
+      std::istringstream linestream(line);
       while (linestream.good()) {
         getline(linestream, num, ',');
         fulldata.push_back(atof(num.c_str()));
@@ -32,12 +32,12 @@ void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest,
       covtype_labels.push_back(label-1);
     }
   }
-  cout << "label set size:" << covtype_labels.size() << endl;
+  std::cout << "label set size:" << covtype_labels.size() << std::endl;
   Map<Matrix<double, Dynamic, Dynamic, ColMajor>> Xtt(
       covtype_dataset.data(), 54, covtype_dataset.size() / 54);
   Map<Matrix<double, Dynamic, Dynamic, ColMajor>> yy(covtype_labels.data(),
                                                      covtype_labels.size(), 1);
-  // cout << "Xtt[0]: " << Xtt.col(0) << endl;
+  // std::cout << "Xtt[0]: " << Xtt.col(0) << std::endl;
   Xt = Xtt.leftCols(trainSetSize), y = yy.topRows(trainSetSize),
   XtTest = Xtt.rightCols(testSetSize), yTest = yy.bottomRows(testSetSize);
   for (int i = 0; i < Xt.cols(); ++i) {
@@ -50,6 +50,6 @@ void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest,
 // 	MatrixXd Xt, XtTest;
 // 	VectorXd y, yTest;
 // 	covtype_read(Xt, y, XtTest, yTest);
-// 	// cout << Xt.cols() << endl;
+// 	// std::cout << Xt.cols() << std::endl;
 // 	return 0;
 // }

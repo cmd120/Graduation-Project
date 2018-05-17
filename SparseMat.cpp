@@ -1,11 +1,11 @@
 #include "include/SparseMat.h"
 
 // create outerStarts array(), jc is counterpart in matlab
-void InitOuterStarts(const SparseMatrix<double> &mat, int *outerStarts) {
+void InitOuterStarts(const Eigen::SparseMatrix<double> &mat, int *outerStarts) {
   *outerStarts = 0;
   int count = 0;
   for (int k = 0; k < mat.outerSize(); ++k) {
-    SparseMatrix<double>::InnerIterator it(mat, k);
+    Eigen::SparseMatrix<double>::InnerIterator it(mat, k);
     int nextColFirstIndex = 0;
     if (it) {
       while (it) {
@@ -18,15 +18,15 @@ void InitOuterStarts(const SparseMatrix<double> &mat, int *outerStarts) {
   }
   // DEBUG
   // for(int i=0;i<count+1;++i){
-  // 	cout << outerStarts[i] <<endl;
+  // 	std::cout << outerStarts[i] <<std::endl;
   // }
   return;
 }
 
-int issparse(vector<double> &mat) {
+int issparse(std::vector<double> &mat) {
   int ret;
   long count = 0;
-  // cout << "mat size: " << mat.size() << endl;
+  // std::cout << "mat size: " << mat.size() << std::endl;
   for (long i = 0; i < mat.size(); ++i) {
     count = (mat[i] - 0) < ACCURACY ? count : count + 1;
   }
@@ -34,21 +34,21 @@ int issparse(vector<double> &mat) {
   return ret;
 }
 
-void algorithmInit(SparseMatrix<double> &Xt, VectorXd &w,
-                   SparseMatrix<double> &XtTest, VectorXd &yTest,
+void algorithmInit(Eigen::SparseMatrix<double> &Xt, Eigen::VectorXd &w,
+                   Eigen::SparseMatrix<double> &XtTest, Eigen::VectorXd &yTest,
                    double &lambda, double &eta, double &a, double &b,
                    double &gamma, int &maxIter, int &batchSize, int &passes,
-                   int &maxRunTime, string &filename, int &datasetNum) {
-  cout << "Input batchSize: " << endl;
-  cin >> batchSize;
-  filename = filename + "_output_sparse_" + to_string(batchSize);
+                   int &maxRunTime, std::string &filename, int &datasetNum) {
+  std::cout << "Input batchSize: " << std::endl;
+  std::cin >> batchSize;
+  filename = filename + "_output_sparse_" + std::to_string(batchSize);
   fp = fopen(filename.c_str(), "w");
   if (fp == NULL) {
-    cout << "Cannot write results to file: " << filename << endl;
+    std::cout << "Cannot write results to file: " << filename << std::endl;
   }
   LogisticError(w, XtTest, yTest, 0, 0, fp);
   epochCounter = (epochCounter + 1) % PRINT_FREQ;
-  VectorXd tmp = Xt.col(0);
+  Eigen::VectorXd tmp = Xt.col(0);
   double L = tmp.array().square().sum() / 4 + lambda;
   lambda = 1 / Xt.cols();
   eta = 0.1;
@@ -61,10 +61,10 @@ void algorithmInit(SparseMatrix<double> &Xt, VectorXd &w,
   double mu = lambda;
   objFuncLR = LR(lambda, L, mu);
   if (DEBUG) {
-    cout << "enter step length:" << endl;
-    cin >> a;
-    cout << "enter passes:" << endl;
-    cin >> passes;
+    std::cout << "enter step length:" << std::endl;
+    std::cin >> a;
+    std::cout << "enter passes:" << std::endl;
+    std::cin >> passes;
   }
   startTime = Clock::now();
   return;

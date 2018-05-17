@@ -1,4 +1,5 @@
 #include "comm.h"
 #define DEBUG 1
 
-void GD_logistic(VectorXd &w, MatrixXd &Xt, VectorXd &y, double lambda, double eta);
+void GD_logistic(Eigen::VectorXd &w, Eigen::MatrixXd &Xt, Eigen::VectorXd &y,
+                 double lambda, double eta);

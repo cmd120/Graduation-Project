@@ -1,16 +1,15 @@
 #ifndef SPARSE_H
 #define SPARSE_H
 
-#include "comm.h"
+#include "Eigen/Sparse"
 #include "LogisticError.h"
-using namespace std;
-using namespace Eigen;
+#include "comm.h"
 
-int issparse(vector<double> &mat);
-void InitOuterStarts(const SparseMatrix<double> &mat, int *outerStarts);
-void algorithmInit(SparseMatrix<double> &Xt, VectorXd &w,
-                   SparseMatrix<double> &XtTest, VectorXd &yTest,
+int issparse(std::vector<double> &mat);
+void InitOuterStarts(const Eigen::SparseMatrix<double> &mat, int *outerStarts);
+void algorithmInit(Eigen::SparseMatrix<double> &Xt, Eigen::VectorXd &w,
+                   Eigen::SparseMatrix<double> &XtTest, Eigen::VectorXd &yTest,
                    double &lambda, double &eta, double &a, double &b,
                    double &gamma, int &maxIter, int &batchSize, int &passes,
-                   int &maxRunTime, string &filename, int &datasetNum);
+                   int &maxRunTime, std::string &filename, int &datasetNum);
 #endif

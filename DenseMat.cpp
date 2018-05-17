@@ -1,29 +1,32 @@
 #include "include/DenseMat.h"
 
-VectorXd LogisticPartialGradient(VectorXd &innerProd, VectorXd &y) {
+Eigen::VectorXd LogisticPartialGradient(Eigen::VectorXd &innerProd,
+                                        Eigen::VectorXd &y) {
   return (1 + (-innerProd).array().exp()).inverse() - y.array();
 }
 double LogisticPartialGradient(double innerProd, double y) {
   return 1 / (1 + exp(-innerProd)) - y;
 }
 
-VectorXd RidgePartialGradient(VectorXd &innerProd, VectorXd &y) {
+Eigen::VectorXd RidgePartialGradient(Eigen::VectorXd &innerProd,
+                                     Eigen::VectorXd &y) {
   return innerProd - y;
 }
 double RidgePartialGradient(double innerProd, double y) {
   return innerProd - y;
 }
 
-void algorithmInit(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest,
+void algorithmInit(Eigen::MatrixXd &Xt, Eigen::VectorXd &w,
+                   Eigen::MatrixXd &XtTest, Eigen::VectorXd &yTest,
                    double &lambda, double &eta, double &a, double &b,
                    double &gamma, int &maxIter, int &batchSize, int &passes,
-                   int &maxRunTime, string &filename, int &datasetNum) {
-  cout << "Input batchSize: " << endl;
-  cin >> batchSize;
-  filename = filename + "_output_dense_" + to_string(batchSize);
+                   int &maxRunTime, std::string &filename, int &datasetNum) {
+  std::cout << "Input batchSize: " << std::endl;
+  std::cin >> batchSize;
+  filename = filename + "_output_dense_" + std::to_string(batchSize);
   fp = fopen(filename.c_str(), "w");
   if (fp == NULL) {
-    cout << "Cannot write results to file: " << filename << endl;
+    std::cout << "Cannot write results to file: " << filename << std::endl;
   }
   LogisticError(w, XtTest, yTest, 0, 0, fp);
   epochCounter = (epochCounter + 1) % PRINT_FREQ;
@@ -44,10 +47,10 @@ void algorithmInit(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest,
       break;
   }
   if (DEBUG) {
-    cout << "enter step length:" << endl;
-    cin >> a;
-    cout << "enter passes:" << endl;
-    cin >> passes;
+    std::cout << "enter step length:" << std::endl;
+    std::cin >> a;
+    std::cout << "enter passes:" << std::endl;
+    std::cin >> passes;
   }
   startTime = Clock::now();
   return;

@@ -1,17 +1,19 @@
 #ifndef DENSE_H
 #define DENSE_H
 
-#include "comm.h"
+#include "Eigen/Dense"
 #include "LogisticError.h"
-using namespace std;
-using namespace Eigen;
+#include "comm.h"
 
-VectorXd LogisticPartialGradient(VectorXd &innerProdI, VectorXd &y);
+Eigen::VectorXd LogisticPartialGradient(Eigen::VectorXd &innerProdI,
+                                        Eigen::VectorXd &y);
 double LogisticPartialGradient(double innerProdI, double y);
-VectorXd RidgePartialGradient(VectorXd &innerProd, VectorXd &y);
+Eigen::VectorXd RidgePartialGradient(Eigen::VectorXd &innerProd,
+                                     Eigen::VectorXd &y);
 double RidgePartialGradient(double innerProd, double y);
-void algorithmInit(MatrixXd &Xt, VectorXd &w, MatrixXd &XtTest, VectorXd &yTest,
+void algorithmInit(Eigen::MatrixXd &Xt, Eigen::VectorXd &w,
+                   Eigen::MatrixXd &XtTest, Eigen::VectorXd &yTest,
                    double &lambda, double &eta, double &a, double &b,
                    double &gamma, int &maxIter, int &batchSize, int &passes,
-                   int &maxRunTime, string &filename, int &datasetNum);
+                   int &maxRunTime, std::string &filename, int &datasetNum);
 #endif
