@@ -30,8 +30,6 @@ typedef enum {
 #include "DenseMat.h"
 #include "SparseMat.h"
 
-
-
 class LR {
  private:
   double lambda = 0;
@@ -77,8 +75,7 @@ class LR {
     return gradient;
   }
   void hypothesis(VectorXd &w, MatrixXd &X, VectorXd &hypothesis) {
-    hypothesis =
-        (1 + (-X.adjoint() * w).array().exp().array()).matrix().cwiseInverse();
+    hypothesis = 1 / (1 + (-X.adjoint() * w).array().exp().array());
   }
   void costprint(VectorXd &w, MatrixXd &X, VectorXd &y, int stage) {
     double cost = costfunc(w, X, y);
@@ -104,8 +101,8 @@ class LR {
     for (int i = 0; i < n; i++) {
       if (labels[i] == y[i]) score += 1;
     }
-    if(DEBUG){
-      cout << "score: "<< score << endl;
+    if (DEBUG) {
+      cout << "score: " << score << endl;
       cout << "n: " << n << endl;
     }
     return score / n;
@@ -169,8 +166,8 @@ class RR {
     for (int i = 0; i < n; i++) {
       if (labels[i] == y[i]) score += 1;
     }
-    if(DEBUG){
-      cout << "score: "<< score << endl;
+    if (DEBUG) {
+      cout << "score: " << score << endl;
       cout << "n: " << n << endl;
     }
     return score / n;

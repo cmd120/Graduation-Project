@@ -26,12 +26,13 @@ void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest,
   for (int i = 0; i < fulldata.size() / 55; ++i) {
     int label = fulldata[i * 55 + 54];
     // binary classification
-    if (label == 1 || label == 0) {
+    if (label == 1 || label == 2) {
       covtype_dataset.insert(covtype_dataset.end(), fulldata.begin() + i * 55,
                              fulldata.begin() + i * 55 + 54);
-      covtype_labels.push_back(label);
+      covtype_labels.push_back(label-1);
     }
   }
+  cout << "label set size:" << covtype_labels.size() << endl;
   Map<Matrix<double, Dynamic, Dynamic, ColMajor>> Xtt(
       covtype_dataset.data(), 54, covtype_dataset.size() / 54);
   Map<Matrix<double, Dynamic, Dynamic, ColMajor>> yy(covtype_labels.data(),
