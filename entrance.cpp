@@ -1,12 +1,11 @@
+#include "include/Data.h"
 #include "include/IAG.h"
 #include "include/IAGA.h"
-#include "include/MNIST_Read.h"
 #include "include/SAG.h"
 #include "include/SAGA.h"
 #include "include/SGD.h"
 #include "include/SIG.h"
 #include "include/SVRG.h"
-#include "include/covtype.h"
 
 int epochCounter;
 FILE *fp;
@@ -303,22 +302,23 @@ int LogisticEntrance(int algorithmType, int datasetNum, Eigen::MatrixXd &Xt,
 }
 
 void datasetOption(int &datasetNum) {
-  const int NUMBEROFDATASET = 2;
-  const std::string datasets[NUMBEROFDATASET] = {"MNIST", "COVTYPE"};
+  const int NUMBEROFDATASET = 10;
+  const std::string datasets[NUMBEROFDATASET] = {
+      "MNIST", "COVTYPE", "ALOI",   "CONNECT4", "DNA",
+      "GLASS", "IRIS",    "LETTER", "RCV1",     "SensIT"};
   std::cout << "Available datasets to choose from:" << std::endl;
   for (int i = 0; i < NUMBEROFDATASET; ++i) {
-    std::cout << i + 1 << "." << datasets[i] << std::endl;
+    std::cout << i << "." << datasets[i] << std::endl;
   }
   std::cout << "Enter your choice of dataset: " << std::endl;
   std::cin >> datasetNum;
-  std::cout << "Your choice of dataset: " << datasets[datasetNum - 1]
-            << std::endl;
+  std::cout << "Your choice of dataset: " << datasets[datasetNum] << std::endl;
   return;
 }
 void algorithmOption(int &algorithmType) {
   const int NUMBEROFAlGORITHM = 7;
-  const std::string algorithms[NUMBEROFAlGORITHM] = {"IAG", "IAGA", "SAG", "SAGA",
-                                                "SGD", "SIG",  "SVRG"};
+  const std::string algorithms[NUMBEROFAlGORITHM] = {
+      "IAG", "IAGA", "SAG", "SAGA", "SGD", "SIG", "SVRG"};
   std::cout << "Enter your choice of algorithm: (0 to quit)" << std::endl;
   for (int i = 0; i < NUMBEROFAlGORITHM; ++i) {
     std::cout << i + 1 << "." << algorithms[i] << std::endl;
@@ -346,21 +346,102 @@ int main(int argc, char *argv[]) {
   Eigen::MatrixXd Xt, XtTest;
   Eigen::SparseMatrix<double> XtS, XtTestS;
   Eigen::VectorXd y, yTest;
-  int algorithmType = 0, datasetNum;
-
+  int algorithmType = 0, datasetNum, features, trainSize = 0, testSize = 0,
+      sparseFormat = 1;
+  std::string trainfile, testfile;
   datasetOption(datasetNum);
   switch (datasetNum) {
-    case 1:
+    case 0:
+      /*Custom dataset example*/
       mnist_read(Xt, y, XtTest, yTest);
       break;
-    case 2:
-      covtype_read(Xt, y, XtTest, yTest);
+    case 1:
+      /*If dataset file is dense format, use DenseFormatRead to read*/
+      /*If dataset file is sparse format, use SparseFormatRead to read*/
+      trainSize = 200;
+      testSize = 10;
+      features = 54;
+      trainfile = "covtype.libsvm.binary";
+      testfile = "covtype.libsvm.binary";
       break;
+    case 2:
+      trainSize = 200;
+      testSize = 10;
+      features = 128;
+      trainfile = "aloi.scale";
+      testfile = "aloi.scale";
+      break;
+    case 3:
+      trainSize = 200;
+      testSize = 10;
+      features = 126;
+      trainfile = "connect-4";
+      testfile = "connect-4";
+      break;
+    case 4:
+      trainSize = 200;
+      testSize = 10;
+      features = 180;
+      trainfile = "dna.scale.tr";
+      testfile = "dna.scale.t";
+      break;
+    case 5:
+      trainSize = 200;
+      testSize = 10;
+      features = 9;
+      trainfile = "glass.scale";
+      testfile = "glass.scale";
+      break;
+    case 6:
+      trainSize = 200;
+      testSize = 10;
+      features = 4;
+      trainfile = "iris.scale";
+      testfile = "iris.scale";
+      break;
+    case 7:
+      trainSize = 200;
+      testSize = 10;
+      features = 16;
+      trainfile = "letter.scale.tr";
+      testfile = "letter.scale.t";
+      break;
+    case 8:
+      trainSize = 200;
+      testSize = 10;
+      features = 47236;
+      trainfile = "rcv1_train.multiclass";
+      testfile = "rcv1_test.multiclass";
+      break;
+    case 9:
+      trainSize = 200;
+      testSize = 10;
+      features = 50;
+      trainfile = "seismic_scale";
+      testfile = "seismic_scale.t";
+      break;
+    default:
+      std::cout << "Input Invalid." << std::endl;
   }
+  // datasetNum = 0 is mnist dataset
+  if (datasetNum && sparseFormat) {
+    SparseFormatRead(XtS, y, features, trainSize, trainfile);
+    SparseFormatRead(XtTestS, yTest, features, testSize, testfile);
+  } else if (datasetNum && !sparseFormat) {
+    DenseFormatRead(Xt, y, features, trainSize, trainfile);
+    DenseFormatRead(Xt, y, features, testSize, testfile);
+    if (SPARSE) {
+      XtS = Xt.sparseView();
+      XtTestS = Xt.sparseView();
+    }
+  }
+  SPARSE ? printf("XtS rows:%d XtS cols:%d XtTestS rows:%d XtTestS cols:%d\n",
+                  XtS.rows(), XtS.cols(), XtTestS.rows(), XtTestS.rows())
+         : printf("Xt rows:%d Xt cols:%d XtTest rows:%d XtTest cols:%d\n",
+                  Xt.rows(), Xt.cols(), XtTest.rows(), XtTest.rows());
+  printf("y size:%d yTest size:%d", y.size(), yTest.size());
   std::cout << "dataset loaded." << std::endl;
   if (SPARSE) {
-    XtS = Xt.sparseView();
-    XtTestS = XtTest.sparseView();
     std::cout << "dataset is sparse" << std::endl;
   } else {
     std::cout << "dataset is dense" << std::endl;

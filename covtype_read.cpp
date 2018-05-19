@@ -29,7 +29,7 @@ void covtype_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest,
     if (label == 1 || label == 2) {
       covtype_dataset.insert(covtype_dataset.end(), fulldata.begin() + i * 55,
                              fulldata.begin() + i * 55 + 54);
-      covtype_labels.push_back(label-1);
+      covtype_labels.push_back(label - 1);
     }
   }
   std::cout << "label set size:" << covtype_labels.size() << std::endl;
