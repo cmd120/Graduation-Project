@@ -24,8 +24,6 @@ typedef enum {
 #include <vector>
 
 #include "DenseMat.h"
-#include "Eigen/Dense"
-#include "Eigen/Sparse"
 #include "LogisticGradient.h"
 #include "Noise.h"
 #include "SparseMat.h"

@@ -1,8 +1,8 @@
-objects = entrance.o MNIST_Read.o covtype_read.o DenseMat.o \
+objects = entrance.o Data.o DenseMat.o \
 			SparseMat.o LogisticError.o LogisticGradient.o IAG_logistic.o \
 			IAGA_logistic.o SAG_logistic.o SAGA_logistic.o SGD_logistic.o \
-			SIG_logistic.o SVRG_logistic.o covtype_binary_read.o
-headers = include/comm.h include/MNIST_Read.h include/covtype.h include/IAG.h \
+			SIG_logistic.o SVRG_logistic.o
+headers = include/comm.h include/Data.h include/IAG.h \
 		 	include/IAGA.h include/SAG.h include/SAGA.h include/SGD.h \
 		 	include/SIG.h include/SVRG.h include/DenseMat.h include/SparseMat.h
 
@@ -15,12 +15,8 @@ DenseMat.o:DenseMat.cpp include/DenseMat.h
 	g++ -O3 -std=c++11 -c DenseMat.cpp
 SparseMat.o:SparseMat.cpp include/SparseMat.h
 	g++ -O3 -std=c++11 -c SparseMat.cpp
-covtype_read.o:covtype_read.cpp include/covtype.h
-	g++ -O3 -std=c++11 -c covtype_read.cpp
-covtype_binary_read.o: covtype_binary_read.cpp include/covtype.h
-	g++ -O3 -std=c++11 -c covtype_binary_read.cpp
-MNIST_Read.o:MNIST_Read.cpp include/MNIST_Read.h
-	g++ -O3 -std=c++11 -c MNIST_Read.cpp
+Data.o:Data.cpp include/Data.h
+	g++ -O3 -std=c++11 -c Data.cpp
 LogisticError.o:LogisticError.cpp include/LogisticError.h
 	g++ -O3 -std=c++11 -c LogisticError.cpp
 LogisticGradient.o:LogisticGradient.cpp include/LogisticGradient.h
