@@ -30,13 +30,15 @@ inline void tripletInit(std::ifstream &file, std::string &line,
       getline(linestream, slabel, ' ');
       label = atof(slabel.c_str());
       // Default: Deal with binary classification problem
-      if (abs(label - 1) > 0.0001 && abs(label - 2) > 0.0001)
+      // Except covtype dataset labels(1 or 2), others labels are -1 or 1
+      if (abs((int)labe) l != 1 && abs((int)label) != 2)
         continue;
       else {
+        label = abs((int)label) == 1 ? (label + 1) : label;
         std::cout << "label:" << label << std::endl;
       }
-      // Chage label from 1|2 to 0|1
-      labelList.push_back(label - 1);
+      // Chage label range to 0|1
+      if ((int)label >) labelList.push_back(label - 1);
       while (linestream.good()) {
         getline(linestream, element, ' ');
         std::stringstream elementstream(element);
@@ -106,6 +108,7 @@ std::vector<BYTE> read_mnist_labels(std::string filename) {
 }
 
 void mnist_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest, VectorXd &yTest) {
+  const int features = 784;
   std::string train_image_name = "mnist.train.images";
   std::string train_label_name = "mnist.train.labels";
   std::string test_image_name = "mnist.test.images";
@@ -129,24 +132,25 @@ void mnist_read(MatrixXd &Xt, VectorXd &y, MatrixXd &XtTest, VectorXd &yTest) {
   for (int i = 0; i < y_train.size(); ++i) {
     if (y_train[i] <= 1) {
       Xt_train_classify.insert(Xt_train_classify.end(),
-                               Xt_train.begin() + i * 784,
-                               Xt_train.begin() + (i + 1) * 784);
+                               Xt_train.begin() + i * features,
+                               Xt_train.begin() + (i + 1) * features);
       y_train_classify.push_back(y_train[i]);
     }
   }
   for (int i = 0; i < y_test.size(); ++i) {
     if (y_test[i] <= 1) {
-      Xt_test_classify.insert(Xt_test_classify.end(), Xt_test.begin() + i * 784,
-                              Xt_test.begin() + (i + 1) * 784);
+      Xt_test_classify.insert(Xt_test_classify.end(),
+                              Xt_test.begin() + i * features,
+                              Xt_test.begin() + (i + 1) * features);
       y_test_classify.push_back(y_test[i]);
     }
   }
   Map<Matrix<double, Dynamic, Dynamic, ColMajor>> Xtt(
-      Xt_train_classify.data(), 784, Xt_train_classify.size() / 784);
+      Xt_train_classify.data(), features, Xt_train_classify.size() / features);
   Map<Matrix<double, Dynamic, Dynamic, ColMajor>> yy(
       y_train_classify.data(), y_train_classify.size(), 1);
   Map<Matrix<double, Dynamic, Dynamic, ColMajor>> XttTest(
-      Xt_test_classify.data(), 784, Xt_test_classify.size() / 784);
+      Xt_test_classify.data(), features, Xt_test_classify.size() / features);
   Map<Matrix<double, Dynamic, Dynamic, ColMajor>> yyTest(
       y_test_classify.data(), y_test_classify.size(), 1);
   // normalization
