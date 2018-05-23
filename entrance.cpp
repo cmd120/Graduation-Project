@@ -13,6 +13,13 @@ std::chrono::high_resolution_clock::time_point startTime;
 int SPARSE;
 LR objFuncLR;
 RR objFuncRR;
+// available datasets
+const std::vector<std::string> datasetNameList = {
+    "MNIST",   "COVTYPE",      "A1A",     "AUSTRALIAN",
+    "COD-RNA", "COLON-CANCER", "DIABETS", "BREAST-CANCER"};
+// supported algorithms
+const std::vector<std::string> algorithmNameList = {
+    "IAG", "IAGA", "SAG", "SAGA", "SGD", "SIG", "SVRG"};
 int LogisticEntrance(int algorithmType, int datasetNum,
                      Eigen::SparseMatrix<double> &XtS, Eigen::VectorXd &y,
                      Eigen::SparseMatrix<double> &XtTestS,
@@ -20,7 +27,6 @@ int LogisticEntrance(int algorithmType, int datasetNum,
   Eigen::VectorXd w, wtilde, G, sumIG, gradients;
   double lambda, eta, a, b, gamma;
   int maxIter, batchSize, passes, maxRunTime;
-  SPARSE = 0;
   int nVars, nSamples, flag;
   std::string filename;
   int *innerIndices, *outerStarts;
@@ -169,7 +175,6 @@ int LogisticEntrance(int algorithmType, int datasetNum, Eigen::MatrixXd &Xt,
   Eigen::VectorXd w, wtilde, G, sumIG, gradients;
   double lambda, eta, a, b, gamma;
   int maxIter, batchSize, passes, maxRunTime;
-  SPARSE = 0;
   int nVars, nSamples, flag;
   std::string filename;
   w = Eigen::MatrixXd::Zero(Xt.rows(), 1);
@@ -302,32 +307,26 @@ int LogisticEntrance(int algorithmType, int datasetNum, Eigen::MatrixXd &Xt,
 }
 
 void datasetOption(int &datasetNum) {
-  const int NUMBEROFDATASET = 10;
-  const std::string datasets[NUMBEROFDATASET] = {
-      "MNIST", "COVTYPE", "ALOI",   "CONNECT4", "DNA",
-      "GLASS", "IRIS",    "LETTER", "RCV1",     "SensIT"};
   std::cout << "Available datasets to choose from:" << std::endl;
-  for (int i = 0; i < NUMBEROFDATASET; ++i) {
-    std::cout << i << "." << datasets[i] << std::endl;
+  for (int i = 0; i < datasetNameList.size(); ++i) {
+    std::cout << i << "." << datasetNameList[i] << std::endl;
   }
   std::cout << "Enter your choice of dataset: " << std::endl;
   std::cin >> datasetNum;
-  std::cout << "Your choice of dataset: " << datasets[datasetNum] << std::endl;
+  std::cout << "Your choice of dataset: " << datasetNameList[datasetNum]
+            << std::endl;
   return;
 }
 void algorithmOption(int &algorithmType) {
-  const int NUMBEROFAlGORITHM = 7;
-  const std::string algorithms[NUMBEROFAlGORITHM] = {
-      "IAG", "IAGA", "SAG", "SAGA", "SGD", "SIG", "SVRG"};
   std::cout << "Enter your choice of algorithm: (0 to quit)" << std::endl;
-  for (int i = 0; i < NUMBEROFAlGORITHM; ++i) {
-    std::cout << i + 1 << "." << algorithms[i] << std::endl;
+  for (int i = 0; i < algorithmNameList.size(); ++i) {
+    std::cout << i + 1 << "." << algorithmNameList[i] << std::endl;
   }
   while (1) {
     if (std::cin >> algorithmType) {
       if (algorithmType)
         std::cout << "Your choice of algorithm: "
-                  << algorithms[algorithmType - 1] << std::endl;
+                  << algorithmNameList[algorithmType - 1] << std::endl;
       else
         std::cout << "Bye" << std::endl;
       break;
@@ -350,6 +349,7 @@ int main(int argc, char *argv[]) {
       sparseFormat = 1;
   std::string trainfile, testfile;
   datasetOption(datasetNum);
+  DATASET data;
   switch (datasetNum) {
     case 0:
       /*Custom dataset example*/
@@ -358,78 +358,82 @@ int main(int argc, char *argv[]) {
     case 1:
       /*If dataset file is dense format, use DenseFormatRead to read*/
       /*If dataset file is sparse format, use SparseFormatRead to read*/
-      trainSize = 200;
-      testSize = 10;
-      features = 54;
-      trainfile = "covtype.libsvm.binary";
-      testfile = "covtype.libsvm.binary";
+      // Covetype
+      // Source: UCI / Covertype
+      // # of classes: 2
+      // # of data: 581,012
+      // # of features: 54
+      data = DATASET(datasetNameList[datasetNum], 54, "covtype.libsvm.binary",
+                     "covtype.libsvm.binary", 2000, 100);
       break;
     case 2:
-      trainSize = 200;
-      testSize = 10;
-      features = 128;
-      trainfile = "aloi.scale";
-      testfile = "aloi.scale";
+      // a1a
+      // Source: UCI / Adult
+      // # of classes: 2
+      // # of data: 1,605 / 30,956 (testing)
+      // # of features: 123 / 123 (testing)
+      data = DATASET(datasetNameList[datasetNum], 123, "a1a", "a1a.t", 1605,
+                     30956);
       break;
     case 3:
-      trainSize = 200;
-      testSize = 10;
-      features = 126;
-      trainfile = "connect-4";
-      testfile = "connect-4";
+      // australian
+      // Source: Statlog / Australian
+      // # of classes: 2
+      // # of data: 690
+      // # of features: 14
+      data = DATASET(datasetNameList[datasetNum], 14, "australian",
+                     "australian", 690, 690);
       break;
     case 4:
-      trainSize = 200;
-      testSize = 10;
-      features = 180;
-      trainfile = "dna.scale.tr";
-      testfile = "dna.scale.t";
+      // cod-rna
+      // Source: [AVU06a]
+      // # of classes: 2
+      // # of data: 59,535 / 271617 (validation) / 157413 (unused/remaining)
+      // # of features: 8
+      data = DATASET(datasetNameList[datasetNum], 8, "cod-rna", "cod-rna.t",
+                     59535, 271617);
       break;
     case 5:
-      trainSize = 200;
-      testSize = 10;
-      features = 9;
-      trainfile = "glass.scale";
-      testfile = "glass.scale";
+      // colon-cancer
+      // Source: [AU99a]
+      // # of classes: 2
+      // # of data: 62
+      // # of features: 2,000
+      data = DATASET(datasetNameList[datasetNum], 2000, "colon-cancer",
+                     "colon-cancer", 62, 62);
       break;
     case 6:
-      trainSize = 200;
-      testSize = 10;
-      features = 4;
-      trainfile = "iris.scale";
-      testfile = "iris.scale";
+      // diabets
+      // UCI / Pima Indians Diabetes
+      // # of classes: 2
+      // # of data: 768
+      // # of features: 8
+      data = DATASET(datasetNameList[datasetNum], 8, "diabetes", "diabetes",
+                     768, 768);
       break;
     case 7:
-      trainSize = 200;
-      testSize = 10;
-      features = 16;
-      trainfile = "letter.scale.tr";
-      testfile = "letter.scale.t";
-      break;
-    case 8:
-      trainSize = 200;
-      testSize = 10;
-      features = 47236;
-      trainfile = "rcv1_train.multiclass";
-      testfile = "rcv1_test.multiclass";
-      break;
-    case 9:
-      trainSize = 200;
-      testSize = 10;
-      features = 50;
-      trainfile = "seismic_scale";
-      testfile = "seismic_scale.t";
+      // duke breast-cancer
+      // Source: [MW01a]
+      // # of classes: 2
+      // # of data: 44
+      // # of features: 7,129
+      data = DATASET(datasetNameList[datasetNum], 7129, "duke.tr", "duke.val",
+                     38, 4);
       break;
     default:
       std::cout << "Input Invalid." << std::endl;
   }
   // datasetNum = 0 is mnist dataset
   if (datasetNum && sparseFormat) {
-    SparseFormatRead(XtS, y, features, trainSize, trainfile);
-    SparseFormatRead(XtTestS, yTest, features, testSize, testfile);
+    SparseFormatRead(XtS, y, data.getfeatures(), data.gettrainsize(),
+                     data.gettrainfilename());
+    SparseFormatRead(XtTestS, yTest, data.getfeatures(), data.gettestsize(),
+                     data.gettestfilename());
   } else if (datasetNum && !sparseFormat) {
-    DenseFormatRead(Xt, y, features, trainSize, trainfile);
-    DenseFormatRead(Xt, y, features, testSize, testfile);
+    DenseFormatRead(Xt, y, data.getfeatures(), data.gettrainsize(),
+                    data.gettrainfilename());
+    DenseFormatRead(Xt, y, data.getfeatures(), data.gettestsize(),
+                    data.gettestfilename());
     if (SPARSE) {
       XtS = Xt.sparseView();
       XtTestS = Xt.sparseView();
@@ -450,6 +454,7 @@ int main(int argc, char *argv[]) {
     algorithmOption(algorithmType);
     if (algorithmType) {
       int ret;
+      // std::cout << "SPARSE(in while):" << SPARSE << std::endl;
       ret = SPARSE ? LogisticEntrance(algorithmType, datasetNum, XtS, y,
                                       XtTestS, yTest)
                    : LogisticEntrance(algorithmType, datasetNum, Xt, y, XtTest,

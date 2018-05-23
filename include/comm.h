@@ -183,6 +183,50 @@ class RR {
   }
   ~RR() { ; };
 };
+class ALGORITHM {
+ private:
+  std::string name;
+  double step;
+  double batchSize;
+
+ public:
+  ALGORITHM(std::string name, double step, double batchSize)
+      : name(name), step(step), batchSize(batchSize) {
+    ;
+  }
+  std::string getname() { return this->name; }
+  int setsize(double step) {
+    this->step = step;
+    return 0;
+  }
+};
+class DATASET {
+ private:
+  std::string name;
+  int features;
+  std::string testfilename;
+  std::string trainfilename;
+  int trainsize;
+  int testsize;
+
+ public:
+  DATASET() { ; }
+  DATASET(std::string name, int features, std::string testfilename,
+          std::string trainfilename, int trainsize, int testsize)
+      : name(name),
+        features(features),
+        trainfilename(trainfilename),
+        testfilename(testfilename),
+        trainsize(trainsize),
+        testsize(testsize) {
+    ;
+  }
+  int getfeatures() { return this->features; }
+  int gettrainsize() { return this->trainsize; }
+  int gettestsize() { return this->testsize; }
+  std::string gettrainfilename() { return this->trainfilename; }
+  std::string gettestfilename() { return this->testfilename; }
+};
 extern int epochCounter;
 extern FILE *fp;
 extern std::chrono::high_resolution_clock::time_point startTime;
