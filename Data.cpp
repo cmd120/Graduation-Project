@@ -13,6 +13,28 @@ std::string trim(const std::string &str,
 
   return str.substr(strBegin, strRange);
 }
+std::string reduce(const std::string& str,
+                   const std::string& fill = " ",
+                   const std::string& whitespace = " \t")
+{
+    // trim first
+    auto result = trim(str, whitespace);
+
+    // replace sub ranges
+    auto beginSpace = result.find_first_of(whitespace);
+    while (beginSpace != std::string::npos)
+    {
+        const auto endSpace = result.find_first_not_of(whitespace, beginSpace);
+        const auto range = endSpace - beginSpace;
+
+        result.replace(beginSpace, range, fill);
+
+        const auto newStart = beginSpace + fill.length();
+        beginSpace = result.find_first_of(whitespace, newStart);
+    }
+
+    return result;
+}
 inline void tripletInit(std::ifstream &file, std::string &line,
                         std::vector<T> &triplet, std::string &slabel,
                         double &label, std::string &srow, std::string &svalue,
@@ -21,7 +43,7 @@ inline void tripletInit(std::ifstream &file, std::string &line,
                         const int &datasetSize) {
   int row, col = 0;
   while (col < datasetSize && getline(file, line)) {
-    line = trim(line);
+    line = reduce(line);
     // std::cout << line+"####" << std::endl;
     // return;
     std::stringstream linestream(line);
@@ -51,6 +73,8 @@ inline void tripletInit(std::ifstream &file, std::string &line,
         printf("row:%d,col:%d,value:%f\n", row, col, value);
         triplet.push_back(T(row, col, value));
       }
+      //DEBUG return;
+      // return;
     }
     ++col;
   }
