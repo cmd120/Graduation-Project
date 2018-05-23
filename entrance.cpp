@@ -27,7 +27,6 @@ int LogisticEntrance(int algorithmType, int datasetNum,
   Eigen::VectorXd w, wtilde, G, sumIG, gradients;
   double lambda, eta, a, b, gamma;
   int maxIter, batchSize, passes, maxRunTime;
-  SPARSE = 0;
   int nVars, nSamples, flag;
   std::string filename;
   int *innerIndices, *outerStarts;
@@ -176,7 +175,6 @@ int LogisticEntrance(int algorithmType, int datasetNum, Eigen::MatrixXd &Xt,
   Eigen::VectorXd w, wtilde, G, sumIG, gradients;
   double lambda, eta, a, b, gamma;
   int maxIter, batchSize, passes, maxRunTime;
-  SPARSE = 0;
   int nVars, nSamples, flag;
   std::string filename;
   w = Eigen::MatrixXd::Zero(Xt.rows(), 1);
@@ -456,6 +454,7 @@ int main(int argc, char *argv[]) {
     algorithmOption(algorithmType);
     if (algorithmType) {
       int ret;
+      // std::cout << "SPARSE(in while):" << SPARSE << std::endl;
       ret = SPARSE ? LogisticEntrance(algorithmType, datasetNum, XtS, y,
                                       XtTestS, yTest)
                    : LogisticEntrance(algorithmType, datasetNum, Xt, y, XtTest,

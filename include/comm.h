@@ -210,7 +210,7 @@ class DATASET {
   int testsize;
 
  public:
-  DATASET();
+  DATASET() { ; }
   DATASET(std::string name, int features, std::string testfilename,
           std::string trainfilename, int trainsize, int testsize)
       : name(name),

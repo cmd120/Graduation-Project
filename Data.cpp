@@ -31,14 +31,15 @@ inline void tripletInit(std::ifstream &file, std::string &line,
       label = atof(slabel.c_str());
       // Default: Deal with binary classification problem
       // Except covtype dataset labels(1 or 2), others labels are -1 or 1
-      if (abs((int)labe) l != 1 && abs((int)label) != 2)
+      if (abs((int)label) != 1 && abs((int)label) != 2)
         continue;
       else {
-        label = abs((int)label) == 1 ? (label + 1) : label;
+        label = (int)label == -1 ? (label + 1) : label;
         std::cout << "label:" << label << std::endl;
       }
       // Chage label range to 0|1
-      if ((int)label >) labelList.push_back(label - 1);
+      (int)label > 1 ? labelList.push_back(label - 1)
+                     : labelList.push_back(label);
       while (linestream.good()) {
         getline(linestream, element, ' ');
         std::stringstream elementstream(element);
