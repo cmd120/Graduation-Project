@@ -6,7 +6,9 @@ typedef enum {
   NORMAL,   ///< normal distribution
   UNIFORM,  ///< uniform distribution
 } types;
-
+/// 
+/// Class generates noise following specified distribution.
+///
 class Noise {
  private:
   types distribution_type;  ///< the distribution type of noise

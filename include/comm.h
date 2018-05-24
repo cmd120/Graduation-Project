@@ -276,7 +276,7 @@ class ALGORITHM {
   }
 };
 ///
-/// This class represents a dataset for later training or validation.
+/// Class represents a dataset for later training or validation.
 ///
 class DATASET {
  private:
