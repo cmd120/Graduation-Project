@@ -11,10 +11,10 @@
 //#define EIGEN_USE_MKL_ALL ///< if Intel MKL is installed, uncomment this line
 
 /// An global enum type for function return type.
-/// Use ERROORCODE to know if function works properly and to handle exception
+/// Use ERRORCODE to know if function works properly and to handle exception
 ///
 typedef enum {
-  DEFAULT = 0,
+  DEFAULT = 0,         ///< unassigned
   SUCCESS,             ///< function return successfully
   STEPLENGTHTOOBIG,    ///< the given step size is too big
   STEPLENGTHTOOSMALL,  ///< the given step size is too small
