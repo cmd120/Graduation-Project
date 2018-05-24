@@ -18,9 +18,9 @@ iterations % batchSize - mini-batch size m % pass - used to determine #iteration
 % filename - saving results
 */
 int SAG_LogisticInnerLoopSingle(Eigen::VectorXd &w, const Eigen::MatrixXd &Xt,
-                                Eigen::VectorXd y,
+                                Eigen::VectorXd &y,
                                 const Eigen::MatrixXd &XtTest,
-                                Eigen::VectorXd yTest, Eigen::VectorXd &d,
+                                Eigen::VectorXd &yTest, Eigen::VectorXd &d,
                                 Eigen::VectorXd &g, double lambda, long maxIter,
                                 int nSamples, int nVars, int pass, double a,
                                 double b, double gamma, int maxRunTime) {
@@ -57,13 +57,11 @@ int SAG_LogisticInnerLoopSingle(Eigen::VectorXd &w, const Eigen::MatrixXd &Xt,
   return 0;
 }
 
-int SAG_LogisticInnerLoopBatch(Eigen::VectorXd &w, const Eigen::MatrixXd &Xt,
-                               Eigen::VectorXd y, const Eigen::MatrixXd &XtTest,
-                               Eigen::VectorXd yTest, Eigen::VectorXd &d,
-                               Eigen::VectorXd &g, double lambda, long maxIter,
-                               int nSamples, int nVars, int pass, double a,
-                               double b, double gamma, int maxRunTime,
-                               int batchSize) {
+int SAG_LogisticInnerLoopBatch(
+    Eigen::VectorXd &w, const Eigen::MatrixXd &Xt, Eigen::VectorXd &y,
+    const Eigen::MatrixXd &XtTest, Eigen::VectorXd &yTest, Eigen::VectorXd &d,
+    Eigen::VectorXd &g, double lambda, long maxIter, int nSamples, int nVars,
+    int pass, double a, double b, double gamma, int maxRunTime, int batchSize) {
   long i, idx, j, k;
   double innerProd, eta, telapsed;
   auto endTime = Clock::now();

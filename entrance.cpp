@@ -160,6 +160,8 @@ int LogisticEntrance(int algorithmType, int datasetNum,
   Eigen::MatrixXd tmpXt = Eigen::MatrixXd(XtS),
                   tmpXtTest = Eigen::MatrixXd(XtTestS);
   auto endTime = Clock::now();
+  objFuncLR.optSolution = w;
+  objFuncLR.optCost = objFuncLR.costfunc(w, tmpXt, y);
   printf("telapsed %f\n", std::chrono::duration_cast<std::chrono::nanoseconds>(
                               endTime - startTime)
                                   .count() /
@@ -296,6 +298,8 @@ int LogisticEntrance(int algorithmType, int datasetNum, Eigen::MatrixXd &Xt,
               << 1 / (1 + (-XtTest.adjoint() * w).array().exp()) << std::endl;
   }
   auto endTime = Clock::now();
+  objFuncLR.optSolution = w;
+  objFuncLR.optCost = objFuncLR.costfunc(w, Xt, y);
   printf("telapsed %f\n", std::chrono::duration_cast<std::chrono::nanoseconds>(
                               endTime - startTime)
                                   .count() /

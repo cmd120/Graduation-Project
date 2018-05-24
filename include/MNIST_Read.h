@@ -6,7 +6,7 @@
 
 #include "comm.h"
 
-typedef unsigned char BYTE;
+typedef unsigned char BYTE; ///< unsigned char
 // reverse int
 auto reverseInt = [](int i) {
   unsigned char c1, c2, c3, c4;
