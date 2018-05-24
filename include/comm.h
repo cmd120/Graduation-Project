@@ -1,6 +1,4 @@
-///
-/// comm.h declares basic libraries, global variables and classes across files
-///
+// comm.h declares basic libraries, global variables and classes across files
 #ifndef COMM_H
 #define COMM_H
 
